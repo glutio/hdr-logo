@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Logo - SDR vs HDR</title>
+  <style>
+    :root { color-scheme: dark; font-family: system-ui, sans-serif; background: #111; color: #eee; }
+    * { box-sizing: border-box; }
+    body { max-width: 1200px; margin: auto; padding: 32px 24px; }
+    h1 { font-size: clamp(24px, 4vw, 36px); margin: 0 0 12px; }
+    p { color: #bbb; line-height: 1.6; }
+    .comparison { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; margin: 28px 0; }
+    figure { margin: 0; padding: 20px; background: #000; border: 1px solid #333; border-radius: 16px; }
+    h2 { margin: 0 0 16px; font-size: 20px; }
+    img { display: block; width: 100%; height: auto; }
+    .sdr { dynamic-range-limit: standard; }
+    .hdr { dynamic-range-limit: no-limit; }
+    figcaption { color: #bbb; line-height: 1.5; margin-top: 16px; }
+    a { display: inline-block; margin-top: 12px; color: #f2dba7; text-underline-offset: 4px; }
+    .status { padding: 12px 16px; border: 1px solid #444; border-radius: 8px; }
+    footer { font-size: 14px; }
+    @media (max-width: 650px) {
+      body { padding: 24px 16px; }
+      .comparison { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <h1>Same logo. A brighter border.</h1>
+  <p>Cleaned artwork with smooth, supersampled edges. Compare the SDR baseline with a real HDR gain-map JPEG.</p>
+  <p class="status" id="status" role="status">HDR requires a compatible display, HDR enabled in your operating system, and a browser that supports HDR JPEG gain maps.</p>
+  <main class="comparison">
+    <figure>
+      <h2>SDR baseline</h2>
+      <img class="sdr" src="data:image/png;base64,__SDR__" width="1078" height="1142" alt="Gold logo with a normal-brightness ivory border and black symbols">
+      <figcaption>Normal brightness, with a subtle warm halo.<br><a href="data:image/png;base64,__SDR__" download="start_logo_sdr_preview.png">Download SDR PNG</a></figcaption>
+    </figure>
+    <figure>
+      <h2>HDR illuminated</h2>
+      <img class="hdr" src="data:image/jpeg;base64,__HDR__" width="1078" height="1142" alt="Same gold logo with an HDR-illuminated ivory border">
+      <figcaption>The border reaches approximately 4.5x the SDR baseline at full authored headroom.<br><a href="data:image/jpeg;base64,__HDR__" download="start_logo_hdr.jpg">Download HDR JPEG</a></figcaption>
+    </figure>
+  </main>
+  <footer>
+    <p>On an SDR display, both images should look nearly identical. The HDR effect comes from image data, not a CSS filter or a simulated glow. Capability detection does not confirm that HDR is active or that the gain map is being rendered.</p>
+    <p>This page includes both complete images and works offline. The JPEG uses a black background rather than transparency.</p>
+    <p><a href="data:image/png;base64,__CLEAN__" download="start_logo_clean.png">Download cleaned original PNG (transparent)</a></p>
+  </footer>
+  <script>
+    const capability = matchMedia("(dynamic-range: high)");
+    function updateStatus() {
+      document.getElementById("status").textContent = capability.matches
+        ? "Your browser reports a high-dynamic-range capable display. Enable HDR in your OS; gain-map rendering still depends on browser support."
+        : "Your browser does not report high-dynamic-range capability. The HDR image may appear as its normal SDR fallback.";
+    }
+    capability.addEventListener("change", updateStatus);
+    updateStatus();
+  </script>
+</body>
+</html>
