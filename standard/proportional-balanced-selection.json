@@ -1,0 +1,32 @@
+{
+  "status": "alternative",
+  "asset": "logo-proportional-balanced.png",
+  "source": "logo-proportional-clean.png",
+  "source_sha256": "380e95a32734c30317f767d4a2af7d677c86a0000ed28f237f2440b835bbba20",
+  "sha256": "72d59f8289542b2b873c8fa8481f1faa6b29a75c51448acf37e366bcd4b3d60f",
+  "changes": "Set all three 4 strokes to 28.5px; keep the circle at about 26px, with unchanged glyph bounds and placement.",
+  "checks": {
+    "target_stroke_width_output_pixels": 28.5,
+    "measured_stroke_widths_output_pixels": {
+      "four_vertical": 28.675,
+      "four_horizontal": 28.829,
+      "four_diagonal": 28.397,
+      "circle_horizontal": 25.829,
+      "circle_vertical": 25.829
+    },
+    "four_bounds": [
+      302,
+      172,
+      485,
+      414
+    ],
+    "circle_and_keycap_pixel_identical": true,
+    "validation": {
+      "original_opaque_ink_pixels": 44887,
+      "variant_opaque_ink_pixels": 31964,
+      "changed_pixels": 50852,
+      "outside_glyphs_unchanged": true,
+      "silhouette_unchanged": true
+    }
+  }
+}
