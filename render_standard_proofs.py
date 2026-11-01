@@ -5,7 +5,7 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
-from clean_logo import HEIGHT, OUTPUT_SCALE, WIDTH, fold_mask, rounded
+from clean_logo import HEIGHT, OUTPUT_SCALE, WIDTH, draw_symbols, fold_mask, mask, rounded
 from render_variants import distance
 
 
@@ -13,10 +13,49 @@ ROOT = Path(__file__).resolve().parent
 OUTPUT = ROOT / "standard"
 
 
+def render_flat_standard(standard):
+    layers = [
+        ("border", rounded((1, 1, 537, 570), 96)),
+        ("shoulder", rounded((23, 23, 515, 548), 74)),
+        ("fold", fold_mask(rounded((23, 23, 515, 548), 74))),
+        ("rim", rounded((65, 34, 479, 460), 85)),
+        ("face", rounded((81, 51, 463, 444), 69)),
+        ("symbols", mask(draw_symbols)),
+    ]
+    coverage = [np.asarray(layer) for _, layer in layers]
+    pixels = standard.copy()
+    pixels[..., :3][pixels[..., 3] > 0] = (25, 27, 20)
+    image = Image.fromarray(pixels)
+    palette, cores = {}, {}
+    for index, (name, layer) in enumerate(layers):
+        core = coverage[index] == 255
+        for higher in coverage[index + 1:]:
+            core &= higher == 0
+        assert np.any(core), f"No fully covered pixels in {name}"
+        color = (25, 27, 20) if name in ("border", "symbols") else tuple(
+            np.round(np.median(standard[..., :3][core], axis=0)).astype(int).tolist()
+        )
+        palette[name] = color
+        cores[name] = core
+        if index > 0:
+            image.paste((*color, 255), mask=layer)
+    flat = np.asarray(image)
+    assert np.array_equal(flat[..., 3], standard[..., 3]), "Flat version changed transparency or silhouette"
+    assert np.array_equal(flat[coverage[-1] == 255], standard[coverage[-1] == 255]), "Flat version changed symbol geometry or ink"
+    assert np.array_equal(flat[coverage[1] == 0], standard[coverage[1] == 0]), "Flat version changed the outer border"
+    for name, core in cores.items():
+        colors = np.unique(flat[..., :3][core], axis=0)
+        assert np.array_equal(colors, np.array(palette[name])[None, :]), f"{name} is not one solid color"
+    assert not np.array_equal(flat, standard), "Flat alternative is identical to shaded standard"
+    image.save(OUTPUT / "logo-flat-color.png")
+    return palette, {name: int(np.count_nonzero(core)) for name, core in cores.items()}
+
+
 def main():
     OUTPUT.mkdir(exist_ok=True)
     source = ROOT / "variants" / "ivory-keycap.png"
     original = source.read_bytes()
+    previous_standard = (OUTPUT / "logo.png").read_bytes() if (OUTPUT / "logo.png").exists() else None
     base = np.asarray(Image.open(source).convert("RGBA"))
     height, width = base.shape[:2]
     y, x = np.mgrid[:height, :width].astype(np.float32) / OUTPUT_SCALE
@@ -123,6 +162,25 @@ def main():
             assert abs(measured - 44) < 0.5, f"Uneven rendered corner: {measured}"
             corner_thickness.append(round(measured, 3))
     canonical = (OUTPUT / "logo.png").read_bytes()
+    if previous_standard is not None:
+        assert canonical == previous_standard, "Approved standard changed"
+    palette, core_counts = render_flat_standard(corrected)
+    flat_bytes = (OUTPUT / "logo-flat-color.png").read_bytes()
+    flat_selection = {
+        "status": "alternative",
+        "asset": "logo-flat-color.png",
+        "source": "logo.png",
+        "source_sha256": hashlib.sha256(canonical).hexdigest(),
+        "sha256": hashlib.sha256(flat_bytes).hexdigest(),
+        "colors": {name: "#{:02x}{:02x}{:02x}".format(*color) for name, color in palette.items()},
+        "verified_solid_region_pixels": core_counts,
+        "gradients": False,
+        "dithering": False,
+        "texture": False,
+        "antialiasing": "Only geometric edge transitions contain blended colors.",
+        "geometry": "Same silhouette, 44px border, rim, fold, face, and symbols as the approved standard.",
+    }
+    (OUTPUT / "flat-color-selection.json").write_text(json.dumps(flat_selection, indent=2) + "\n", encoding="utf-8")
     selection = {
         "status": "standard",
         "asset": "logo.png",
@@ -139,8 +197,9 @@ def main():
     (OUTPUT / "selection.json").write_text(json.dumps(selection, indent=2) + "\n", encoding="utf-8")
     cards = []
     for title, filename, description in [
-        ("Before / shaded border", "logo-before-flat-border.png", f"Even 44px geometry, but lighting produced {len(shaded_colors)} different RGB colors in the opaque border."),
-        ("After / solid border", "logo.png", "Same 44px geometry, one solid #191b14 ink color matching the symbols. The ivory artwork is unchanged."),
+        ("Earlier / shaded border", "logo-before-flat-border.png", f"Even 44px geometry, but lighting produced {len(shaded_colors)} different RGB colors in the opaque border."),
+        ("Standard / shaded ivory", "logo.png", "The approved standard: a solid #191b14 border and symbols, with the original shaded ivory artwork."),
+        ("Alternative / solid colors", "logo-flat-color.png", "Identical geometry with five solid colors: ink, shoulder, fold, pale rim, and ivory face. No gradients, dithering, or texture; only edges are antialiased."),
     ]:
         image_src = filename if filename != "logo.png" else f"{filename}?v={selection['sha256'][:12]}"
         sizes = "".join(
@@ -150,11 +209,11 @@ def main():
         cards.append(f"""<article><h2>{title}</h2><img class="large" src="{image_src}" width="1078" height="1142" alt="{title}"><p>{description}</p><div class="sizes">{sizes}</div><a href="{image_src}" download>Download PNG</a></article>""")
     page = """<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Standard ivory logo / border proofs</title><style>
+<title>Standard ivory logo / flat-color comparison</title><style>
 :root{color-scheme:dark;font-family:system-ui,sans-serif;background:#141414;color:#eee}*{box-sizing:border-box}
 body{width:100%;max-width:1500px;margin:auto;padding:28px 20px;overflow-wrap:anywhere}
 h1{font-size:clamp(25px,4vw,34px);margin:0 0 12px}p{color:#bbb;line-height:1.6}
-.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;margin:26px auto;max-width:1120px}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;margin:26px auto;max-width:1500px}
 article{min-width:0;background:#202020;border:1px solid #393939;border-radius:14px;padding:20px}
 h2{font-size:19px;margin:0 0 20px}.large{display:block;width:100%;max-width:360px;height:auto;margin:auto}
 .sizes{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:24px 0}
@@ -165,16 +224,17 @@ footer{margin-top:25px;font-size:14px}@media(max-width:950px){.grid{grid-templat
 </style></head><body>
 <h1>The standard: ivory keycap.</h1>
 <p>The border now has both even geometry and even color: 44px wide, with one solid <code>#191b14</code> ink color matching the symbols. No lighting gradient remains on the border.</p>
-<p>The ivory surface, symbols, and border geometry are unchanged. Only border color and its antialiased edge blends change. The previous shaded border is preserved below.</p>
+<p>The approved standard is unchanged. The new flat-color alternative keeps its geometry but replaces all interior shading and texture with one solid color per region. All earlier versions are preserved.</p>
 <button type="button" onclick="document.body.classList.toggle('light')">Toggle light / dark background</button>
 <main class="grid">__CARDS__</main>
-<footer><p>Antialiased edge pixels blend normally with the ivory face or transparent background; every fully opaque border pixel has exactly the same RGB value. Earlier versions: <a href="../variants/ivory-keycap.png">original ivory</a> | <a href="rim-slimmer.png">slimmer border</a> | <a href="rim-neutral.png">neutral-black border</a>. <a href="selection.json">Border measurements</a> | <a href="../variants/">All previous versions</a> | <a href="../backlight/">Earlier HDR experiment</a></p></footer>
+<footer><p>Antialiased edge pixels blend normally with neighboring regions or the transparent background. In the flat alternative, every fully covered region has exactly one RGB color. Earlier versions: <a href="../variants/ivory-keycap.png">original ivory</a> | <a href="rim-slimmer.png">slimmer border</a> | <a href="rim-neutral.png">neutral-black border</a>. <a href="selection.json">Border measurements</a> | <a href="flat-color-selection.json">Flat-color palette and validation</a> | <a href="../variants/">All previous versions</a> | <a href="../backlight/">Earlier HDR experiment</a></p></footer>
 </body></html>"""
     (OUTPUT / "index.html").write_text(page.replace("__CARDS__", "\n".join(cards)), encoding="utf-8")
     assert source.read_bytes() == original, "Original ivory version changed"
     print(f"Corrected standard: sides 44px; sampled corners {min(corner_thickness):.3f}-{max(corner_thickness):.3f}px.")
     print(f"Opaque border now has {len(border_colors)} RGB color: {border_colors[0].tolist()}. Previously: {len(shaded_colors)} colors.")
     print("Ivory artwork, geometry, and transparency unchanged; previous border archived.")
+    print(f"Flat-color alternative verified: {palette}; one RGB color per fully covered region.")
     print(f"Created {OUTPUT / 'index.html'}")
 
 

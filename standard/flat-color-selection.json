@@ -1,0 +1,28 @@
+{
+  "status": "alternative",
+  "asset": "logo-flat-color.png",
+  "source": "logo.png",
+  "source_sha256": "a5d9667ba6cfc9c4f8daa3837b03e93fa92264dc7d3431921bec407a6c473abf",
+  "sha256": "c67a39a3a91a23a8239bef2e2c9e765c19fe4e92fafe0c5e4c199e16dbfdd669",
+  "colors": {
+    "border": "#191b14",
+    "shoulder": "#b5a27c",
+    "fold": "#dbccab",
+    "rim": "#f0e7d0",
+    "face": "#ebddbf",
+    "symbols": "#191b14"
+  },
+  "verified_solid_region_pixels": {
+    "border": 160366,
+    "shoulder": 239647,
+    "fold": 81387,
+    "rim": 86380,
+    "face": 525390,
+    "symbols": 44887
+  },
+  "gradients": false,
+  "dithering": false,
+  "texture": false,
+  "antialiasing": "Only geometric edge transitions contain blended colors.",
+  "geometry": "Same silhouette, 44px border, rim, fold, face, and symbols as the approved standard."
+}
