@@ -5,12 +5,64 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
-from clean_logo import HEIGHT, OUTPUT_SCALE, WIDTH, draw_symbols, fold_mask, mask, rounded
+from clean_logo import HEIGHT, OUTPUT_SCALE, WIDTH, box, draw_symbols, fold_mask, mask, points, rounded
 from render_variants import distance
 
 
 ROOT = Path(__file__).resolve().parent
 OUTPUT = ROOT / "standard"
+
+
+def draw_photo_symbols(draw):
+    number = [(158, 164), (234, 66), (240, 64), (240, 164), (260, 164),
+              (260, 172), (240, 172), (240, 210), (231, 210),
+              (231, 172), (158, 172)]
+    draw.polygon(points(number), fill=255)
+    draw.polygon(points([(171, 164), (231, 85), (231, 164)]), fill=0)
+    draw.ellipse(box((145.5, 284.5, 274.5, 413.5)), fill=255)
+    center = np.array([210, 349])
+    for dx, dy in [(-1, -1), (1, -1), (-1, 1), (1, 1)]:
+        direction = np.array([dx, dy]) / np.sqrt(2)
+        normal = np.array([-direction[1], direction[0]])
+        root, tip = center + 54 * direction, center + 83 * direction
+        draw.polygon(points([
+            root + 4.5 * normal, tip + 1.3 * normal,
+            tip - 1.3 * normal, root - 4.5 * normal,
+        ]), fill=255)
+    draw.ellipse(box((154, 293, 266, 405)), fill=0)
+
+
+def render_photo_standard(standard, x, y, light, grain):
+    old_symbols = np.asarray(mask(draw_symbols))
+    new_symbols = np.asarray(mask(draw_photo_symbols))
+    face = np.asarray(rounded((81, 51, 463, 444), 69))
+    face_roll = np.exp(-np.abs(distance(x, y, (81, 51, 463, 444), 69)) / 16)
+    shading = 1.25 * (14 * light - 10 * y / HEIGHT - 7 * face_roll) + grain
+    face_rgb = np.round(np.clip(
+        np.array([229, 215, 185]) + shading[..., None], 0, 255
+    )).astype(np.uint8)
+    unprinted = (face == 255) & (old_symbols == 0)
+    assert np.array_equal(face_rgb[unprinted], standard[..., :3][unprinted]), "Reconstructed ivory shading differs"
+    affected = (old_symbols > 0) | (new_symbols > 0)
+    assert np.all(face[affected] == 255), "New glyphs extend outside the ivory face"
+    replacement = Image.fromarray(face_rgb).convert("RGBA")
+    replacement.paste((25, 27, 20, 255), mask=Image.fromarray(new_symbols))
+    pixels = standard.copy()
+    pixels[affected] = np.asarray(replacement)[affected]
+    assert np.array_equal(pixels[~affected], standard[~affected]), "Artwork outside the glyphs changed"
+    assert np.array_equal(pixels[..., 3], standard[..., 3]), "Keycap silhouette changed"
+    assert np.all(pixels[old_symbols > new_symbols] == np.asarray(replacement)[old_symbols > new_symbols]), "Old glyph remnants remain"
+    old_ink = int(np.count_nonzero(old_symbols == 255))
+    new_ink = int(np.count_nonzero(new_symbols == 255))
+    assert 0 < new_ink < old_ink, "Photo-inspired glyphs are not lighter"
+    Image.fromarray(pixels).save(OUTPUT / "logo-photo-glyphs.png")
+    return {
+        "original_opaque_ink_pixels": old_ink,
+        "variant_opaque_ink_pixels": new_ink,
+        "changed_pixels": int(np.count_nonzero(np.any(pixels != standard, axis=-1))),
+        "outside_glyphs_unchanged": True,
+        "silhouette_unchanged": True,
+    }
 
 
 def render_flat_standard(standard):
@@ -56,6 +108,8 @@ def main():
     source = ROOT / "variants" / "ivory-keycap.png"
     original = source.read_bytes()
     previous_standard = (OUTPUT / "logo.png").read_bytes() if (OUTPUT / "logo.png").exists() else None
+    previous_versions = {path: path.read_bytes() for path in OUTPUT.glob("*.png")
+                         if path.name != "logo-photo-glyphs.png"}
     base = np.asarray(Image.open(source).convert("RGBA"))
     height, width = base.shape[:2]
     y, x = np.mgrid[:height, :width].astype(np.float32) / OUTPUT_SCALE
@@ -181,6 +235,20 @@ def main():
         "geometry": "Same silhouette, 44px border, rim, fold, face, and symbols as the approved standard.",
     }
     (OUTPUT / "flat-color-selection.json").write_text(json.dumps(flat_selection, indent=2) + "\n", encoding="utf-8")
+    photo_checks = render_photo_standard(corrected, x, y, light, grain)
+    photo_bytes = (OUTPUT / "logo-photo-glyphs.png").read_bytes()
+    photo_selection = {
+        "status": "alternative",
+        "asset": "logo-photo-glyphs.png",
+        "source": "logo.png",
+        "source_sha256": hashlib.sha256(canonical).hexdigest(),
+        "sha256": hashlib.sha256(photo_bytes).hexdigest(),
+        "reference": "../bk-0010-01-4-key.png",
+        "changes": "Thinner pointed 4, lighter ring, shorter tapered tips, and increased glyph spacing.",
+        "fidelity": "A clean photo-inspired approximation, not an exact tracing of the blurred printing.",
+        "validation": photo_checks,
+    }
+    (OUTPUT / "photo-glyph-selection.json").write_text(json.dumps(photo_selection, indent=2) + "\n", encoding="utf-8")
     selection = {
         "status": "standard",
         "asset": "logo.png",
@@ -197,9 +265,10 @@ def main():
     (OUTPUT / "selection.json").write_text(json.dumps(selection, indent=2) + "\n", encoding="utf-8")
     cards = []
     for title, filename, description in [
-        ("Earlier / shaded border", "logo-before-flat-border.png", f"Even 44px geometry, but lighting produced {len(shaded_colors)} different RGB colors in the opaque border."),
         ("Standard / shaded ivory", "logo.png", "The approved standard: a solid #191b14 border and symbols, with the original shaded ivory artwork."),
+        ("Photo-inspired / lighter glyphs", "logo-photo-glyphs.png", "Only the printing changes: a thinner pointed 4, a lighter ring with shorter tapered tips, and more space between the symbols. The shaded ivory, rim, fold, and solid border are unchanged."),
         ("Alternative / solid colors", "logo-flat-color.png", "Identical geometry with five solid colors: ink, shoulder, fold, pale rim, and ivory face. No gradients, dithering, or texture; only edges are antialiased."),
+        ("Earlier / shaded border", "logo-before-flat-border.png", f"Even 44px geometry, but lighting produced {len(shaded_colors)} different RGB colors in the opaque border."),
     ]:
         image_src = filename if filename != "logo.png" else f"{filename}?v={selection['sha256'][:12]}"
         sizes = "".join(
@@ -209,32 +278,37 @@ def main():
         cards.append(f"""<article><h2>{title}</h2><img class="large" src="{image_src}" width="1078" height="1142" alt="{title}"><p>{description}</p><div class="sizes">{sizes}</div><a href="{image_src}" download>Download PNG</a></article>""")
     page = """<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Standard ivory logo / flat-color comparison</title><style>
+<title>Standard ivory logo / photo-inspired glyph comparison</title><style>
 :root{color-scheme:dark;font-family:system-ui,sans-serif;background:#141414;color:#eee}*{box-sizing:border-box}
 body{width:100%;max-width:1500px;margin:auto;padding:28px 20px;overflow-wrap:anywhere}
 h1{font-size:clamp(25px,4vw,34px);margin:0 0 12px}p{color:#bbb;line-height:1.6}
-.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;margin:26px auto;max-width:1500px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;margin:26px auto;max-width:1120px}
 article{min-width:0;background:#202020;border:1px solid #393939;border-radius:14px;padding:20px}
 h2{font-size:19px;margin:0 0 20px}.large{display:block;width:100%;max-width:360px;height:auto;margin:auto}
 .sizes{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:24px 0}
 .sizes figure{margin:0}.sizes img{display:block;height:auto}.sizes figcaption{text-align:center;color:#aaa;margin-top:10px;font-size:12px}
 a{color:#ead2a2;text-underline-offset:4px}button{font:inherit;background:#262626;color:#eee;border:1px solid #555;border-radius:8px;padding:10px 15px;cursor:pointer}
 .light article{background:#eeeae3}.light h2{color:#222}.light article p,.light figcaption{color:#555}.light article a{color:#795521}
+.reference{margin:28px auto;max-width:320px}.reference img{display:block;width:100%;height:auto}.reference figcaption{color:#bbb;margin-top:12px}
 footer{margin-top:25px;font-size:14px}@media(max-width:950px){.grid{grid-template-columns:1fr}article{max-width:600px;width:100%;margin:auto}}
 </style></head><body>
 <h1>The standard: ivory keycap.</h1>
 <p>The border now has both even geometry and even color: 44px wide, with one solid <code>#191b14</code> ink color matching the symbols. No lighting gradient remains on the border.</p>
-<p>The approved standard is unchanged. The new flat-color alternative keeps its geometry but replaces all interior shading and texture with one solid color per region. All earlier versions are preserved.</p>
+<p>The approved shaded standard is unchanged. The new photo-inspired alternative changes only the glyphs: lighter printing, tapered tips, and more breathing room. It approximates the photographed shapes without copying blur or wear. All earlier versions are preserved.</p>
 <button type="button" onclick="document.body.classList.toggle('light')">Toggle light / dark background</button>
 <main class="grid">__CARDS__</main>
-<footer><p>Antialiased edge pixels blend normally with neighboring regions or the transparent background. In the flat alternative, every fully covered region has exactly one RGB color. Earlier versions: <a href="../variants/ivory-keycap.png">original ivory</a> | <a href="rim-slimmer.png">slimmer border</a> | <a href="rim-neutral.png">neutral-black border</a>. <a href="selection.json">Border measurements</a> | <a href="flat-color-selection.json">Flat-color palette and validation</a> | <a href="../variants/">All previous versions</a> | <a href="../backlight/">Earlier HDR experiment</a></p></footer>
+<figure class="reference"><img src="../bk-0010-01-4-key.png" width="485" height="501" alt="Photograph of the original keyboard 4 and currency-symbol key"><figcaption>The photographed key / shape reference.</figcaption></figure>
+<footer><p>Antialiased edge pixels blend normally with neighboring regions or the transparent background. In the flat alternative, every fully covered region has exactly one RGB color. Earlier versions: <a href="../variants/ivory-keycap.png">original ivory</a> | <a href="rim-slimmer.png">slimmer border</a> | <a href="rim-neutral.png">neutral-black border</a>. <a href="selection.json">Border measurements</a> | <a href="photo-glyph-selection.json">Photo-inspired glyph validation</a> | <a href="flat-color-selection.json">Flat-color palette and validation</a> | <a href="../variants/">All previous versions</a> | <a href="../backlight/">Earlier HDR experiment</a></p></footer>
 </body></html>"""
     (OUTPUT / "index.html").write_text(page.replace("__CARDS__", "\n".join(cards)), encoding="utf-8")
     assert source.read_bytes() == original, "Original ivory version changed"
+    for path, previous in previous_versions.items():
+        assert path.read_bytes() == previous, f"Existing version changed: {path.name}"
     print(f"Corrected standard: sides 44px; sampled corners {min(corner_thickness):.3f}-{max(corner_thickness):.3f}px.")
     print(f"Opaque border now has {len(border_colors)} RGB color: {border_colors[0].tolist()}. Previously: {len(shaded_colors)} colors.")
     print("Ivory artwork, geometry, and transparency unchanged; previous border archived.")
     print(f"Flat-color alternative verified: {palette}; one RGB color per fully covered region.")
+    print(f"Photo-inspired glyph alternative verified: {photo_checks}; all existing PNGs preserved byte-for-byte.")
     print(f"Created {OUTPUT / 'index.html'}")
 
 

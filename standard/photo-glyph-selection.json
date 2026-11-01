@@ -1,0 +1,17 @@
+{
+  "status": "alternative",
+  "asset": "logo-photo-glyphs.png",
+  "source": "logo.png",
+  "source_sha256": "a5d9667ba6cfc9c4f8daa3837b03e93fa92264dc7d3431921bec407a6c473abf",
+  "sha256": "c5f9d658fdccc47a9aad33cadd541c5e0d07ade725e2f1700bd47bc71146a46c",
+  "reference": "../bk-0010-01-4-key.png",
+  "changes": "Thinner pointed 4, lighter ring, shorter tapered tips, and increased glyph spacing.",
+  "fidelity": "A clean photo-inspired approximation, not an exact tracing of the blurred printing.",
+  "validation": {
+    "original_opaque_ink_pixels": 44887,
+    "variant_opaque_ink_pixels": 21836,
+    "changed_pixels": 52355,
+    "outside_glyphs_unchanged": true,
+    "silhouette_unchanged": true
+  }
+}
