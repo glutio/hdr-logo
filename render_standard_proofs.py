@@ -77,6 +77,98 @@ def measure_manual_layout(standard, reference_name="manual-layout-reference.png"
     return draw_manual, layout
 
 
+def render_equal_strokes(standard, x, y, light, grain, layout):
+    scale, offset = np.array(layout["four"]["scale"]), np.array(layout["four"]["source_offset"])
+    width = 15 * np.mean(layout["currency"]["scale"])
+    left, top = np.array([151, 81]) * scale + offset
+    right, bottom = np.array([254, 217]) * scale + offset
+    stem_right = 235 * scale[0] + offset[0]
+    stem_left = stem_right - width
+    bar_center = 178.5 * scale[1] + offset[1]
+    bar_top, bar_bottom = bar_center - width / 2, bar_center + width / 2
+    slope = (bar_top - top) / (stem_left - left)
+    counter_edge = bar_top + slope * left + width * np.hypot(1, slope)
+    outer = [
+        (left, bar_top), (stem_left, top), (stem_right, top),
+        (stem_right, bar_top), (right, bar_top), (right, bar_bottom),
+        (stem_right, bar_bottom), (stem_right, bottom),
+        (stem_left, bottom), (stem_left, bar_bottom), (left, bar_bottom),
+    ]
+    counter = [
+        ((counter_edge - bar_top) / slope, bar_top),
+        (stem_left, counter_edge - slope * stem_left),
+        (stem_left, bar_top),
+    ]
+
+    def draw_equal_number(draw):
+        draw.polygon(points(outer), fill=255)
+        draw.polygon(points(counter), fill=0)
+
+    def transform_currency(coords):
+        return np.asarray(coords) * layout["currency"]["scale"] + layout["currency"]["source_offset"]
+
+    def draw_equal(draw):
+        draw_equal_number(draw)
+        draw_currency(draw, transform_currency, np.mean(layout["currency"]["scale"]))
+
+    checks = render_photo_standard(
+        standard, x, y, light, grain, draw_equal, "logo-proportional-equal-stroke.png"
+    )
+    parent = np.asarray(Image.open(OUTPUT / "logo-proportional-clean.png"))
+    result = np.asarray(Image.open(OUTPUT / "logo-proportional-equal-stroke.png"))
+    old_number = np.asarray(mask(lambda draw: draw_number(draw, lambda coords: np.asarray(coords) * scale + offset)))
+    new_number = np.asarray(mask(draw_equal_number))
+    affected = (old_number > 0) | (new_number > 0)
+    assert np.array_equal(result[~affected], parent[~affected]), "Circle or artwork outside the 4 changed"
+
+    def bounds(coverage):
+        ys, xs = np.nonzero(coverage >= 128)
+        return [int(xs.min()), int(ys.min()), int(xs.max()), int(ys.max())]
+
+    assert bounds(new_number) == bounds(old_number), "The 4 moved or changed overall size"
+    assert np.count_nonzero(new_number == 255) < np.count_nonzero(old_number == 255), "The 4 did not become thinner"
+    coverage = np.asarray(mask(draw_equal), dtype=np.float64) / 255
+
+    def stroke_width(center, normal):
+        steps = np.linspace(-24, 24, 1921)
+        positions = np.array(center) * OUTPUT_SCALE + steps[:, None] * np.array(normal)
+        ix, iy = np.floor(positions).astype(int).T
+        fx, fy = (positions - np.floor(positions)).T
+        profile = (
+            coverage[iy, ix] * (1 - fx) * (1 - fy)
+            + coverage[iy, ix + 1] * fx * (1 - fy)
+            + coverage[iy + 1, ix] * (1 - fx) * fy
+            + coverage[iy + 1, ix + 1] * fx * fy
+        )
+        hits = np.flatnonzero(profile >= 0.5)
+        first, last = hits[0], hits[-1]
+        assert first > 0 and last + 1 < len(profile)
+        start = np.interp(0.5, profile[first - 1:first + 1], steps[first - 1:first + 1])
+        end = np.interp(0.5, profile[last:last + 2][::-1], steps[last:last + 2][::-1])
+        return round(float(end - start), 3)
+
+    diagonal_start = np.array([left, bar_top])
+    diagonal_end = np.array([stem_left, top])
+    normal = np.array([slope, 1]) / np.hypot(slope, 1)
+    diagonal_center = diagonal_start + 0.55 * (diagonal_end - diagonal_start) + normal * width / 2
+    measured = {
+        "four_vertical": stroke_width(((stem_left + stem_right) / 2, (bar_bottom + bottom) / 2), (1, 0)),
+        "four_horizontal": stroke_width(((stem_right + right) / 2, bar_center), (0, 1)),
+        "four_diagonal": stroke_width(diagonal_center, normal),
+        "circle_horizontal": stroke_width(transform_currency([(152.5, 339)])[0], (1, 0)),
+        "circle_vertical": stroke_width(transform_currency([(210, 281.5)])[0], (0, 1)),
+    }
+    for name, actual in measured.items():
+        assert abs(actual - width * OUTPUT_SCALE) < 1, f"{name} is not the circle's stroke width: {actual}"
+    return {
+        "target_stroke_width_output_pixels": round(float(width * OUTPUT_SCALE), 3),
+        "measured_stroke_widths_output_pixels": measured,
+        "four_bounds": bounds(new_number),
+        "circle_and_keycap_pixel_identical": True,
+        "validation": checks,
+    }
+
+
 def photo_coords(coords):
     return [(x * WIDTH / PHOTO_SIZE[0], y * HEIGHT / PHOTO_SIZE[1]) for x, y in coords]
 
@@ -325,7 +417,7 @@ def main():
     original = source.read_bytes()
     previous_standard = (OUTPUT / "logo.png").read_bytes() if (OUTPUT / "logo.png").exists() else None
     previous_versions = {path: path.read_bytes() for path in OUTPUT.glob("*.png")
-                         if path.name != "logo-proportional-clean.png"}
+                         if path.name != "logo-proportional-equal-stroke.png"}
     base = np.asarray(Image.open(source).convert("RGBA"))
     height, width = base.shape[:2]
     y, x = np.mgrid[:height, :width].astype(np.float32) / OUTPUT_SCALE
@@ -552,6 +644,20 @@ def main():
     (OUTPUT / "proportional-clean-selection.json").write_text(
         json.dumps(proportional_selection, indent=2) + "\n", encoding="utf-8"
     )
+    equal_checks = render_equal_strokes(corrected, x, y, light, grain, proportional_layout)
+    equal_bytes = (OUTPUT / "logo-proportional-equal-stroke.png").read_bytes()
+    equal_selection = {
+        "status": "alternative",
+        "asset": "logo-proportional-equal-stroke.png",
+        "source": "logo-proportional-clean.png",
+        "source_sha256": hashlib.sha256(proportional_bytes).hexdigest(),
+        "sha256": hashlib.sha256(equal_bytes).hexdigest(),
+        "changes": "Only thin the 4's vertical, horizontal, and diagonal strokes to the unchanged circle's width.",
+        "checks": equal_checks,
+    }
+    (OUTPUT / "proportional-equal-stroke-selection.json").write_text(
+        json.dumps(equal_selection, indent=2) + "\n", encoding="utf-8"
+    )
     selection = {
         "status": "standard",
         "asset": "logo.png",
@@ -568,10 +674,10 @@ def main():
     (OUTPUT / "selection.json").write_text(json.dumps(selection, indent=2) + "\n", encoding="utf-8")
     cards = []
     for title, filename, description in [
+        ("Before / thicker 4", "logo-proportional-clean.png", "Your exact proportional layout with the original stroke weights: the 4 is heavier than the circle."),
+        ("After / equal stroke widths", "logo-proportional-equal-stroke.png", "Only the 4's vertical, horizontal, and diagonal strokes are thinner, matching the circle at about 26px. Neither glyph moves or changes overall size. The circle and keycap pixels are unchanged."),
         ("Standard / shaded ivory", "logo.png", "The approved standard: a solid #191b14 border and symbols, with the original shaded ivory artwork."),
-        ("Your saved layout / clean geometry", "logo-proportional-clean.png", "The exact glyph sizes and positions in your native logo-proportional.png, regenerated from the original geometry rather than resized pixels. The original 4 shape and rounded currency-symbol tips are retained. All keycap artwork is unchanged."),
         ("Your saved layout / raster reference", "logo-proportional.png", "Your native resized image, preserved byte-for-byte. This is the authoritative layout reference, not the earlier screenshot."),
-        ("Alternative / solid colors", "logo-flat-color.png", "Identical geometry with five solid colors: ink, shoulder, fold, pale rim, and ivory face. No gradients, dithering, or texture; only edges are antialiased."),
     ]:
         image_src = f"{filename}?v={hashlib.sha256((OUTPUT / filename).read_bytes()).hexdigest()[:12]}"
         sizes = "".join(
@@ -581,7 +687,7 @@ def main():
         cards.append(f"""<article><h2>{title}</h2><img class="large" src="{image_src}" width="1078" height="1142" alt="{title}"><p>{description}</p><div class="sizes">{sizes}</div><a href="{image_src}" download>Download PNG</a></article>""")
     page = """<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Standard ivory logo / clean rendering of your saved proportional layout</title><style>
+<title>Proportional ivory logo / equal glyph stroke widths</title><style>
 :root{color-scheme:dark;font-family:system-ui,sans-serif;background:#141414;color:#eee}*{box-sizing:border-box}
 body{width:100%;max-width:1500px;margin:auto;padding:28px 20px;overflow-wrap:anywhere}
 h1{font-size:clamp(25px,4vw,34px);margin:0 0 12px}p{color:#bbb;line-height:1.6}
@@ -595,13 +701,13 @@ a{color:#ead2a2;text-underline-offset:4px}button{font:inherit;background:#262626
 .reference{margin:28px auto;max-width:900px}.reference img{display:block;width:100%;height:auto}.reference figcaption{color:#bbb;margin-top:12px}
 footer{margin-top:25px;font-size:14px}@media(max-width:950px){.grid{grid-template-columns:1fr}article{max-width:600px;width:100%;margin:auto}}
 </style></head><body>
-<h1>The standard: ivory keycap.</h1>
+<h1>Proportional ivory: equal glyph stroke widths.</h1>
 <p>The border now has both even geometry and even color: 44px wide, with one solid <code>#191b14</code> ink color matching the symbols. No lighting gradient remains on the border.</p>
-<p>The approved shaded standard is unchanged. The new alternative follows the exact native layout in your saved <code>logo-proportional.png</code>, regenerating both glyphs from their original geometry. No screenshot measurements, glyph raster resizing, or new letterform design. Your file and earlier versions are preserved.</p>
+<p>The new alternative keeps your proportional layout and the circle exactly as they were, thinning only the 4's three strokes to match the circle at about 26px. The 4's overall bounds and position are unchanged. The approved standard, your saved file, and all earlier versions are preserved.</p>
 <button type="button" onclick="document.body.classList.toggle('light')">Toggle light / dark background</button>
 <main class="grid">__CARDS__</main>
 <figure class="reference"><img src="manual-layout-reference.png" width="1374" height="734" alt="Your comparison: manually adjusted glyph layout on the left and our standard on the right"><figcaption>Your untouched comparison: adjusted layout on the left, standard on the right.</figcaption></figure>
-<footer><p>Antialiased edge pixels blend normally with neighboring regions or the transparent background. Earlier versions: <a href="../variants/ivory-keycap.png">original ivory</a> | <a href="logo-manual-layout.png">earlier screenshot reconstruction</a> | <a href="logo-photo-glyphs.png">first photo attempt</a> | <a href="logo-photo-proportions.png">thin measured correction</a> | <a href="logo-photo-proportions-bold.png">earlier bold photo study</a> | <a href="logo-before-flat-border.png">even-width shaded border</a> | <a href="rim-slimmer.png">slimmer border</a> | <a href="rim-neutral.png">neutral-black border</a>. <a href="selection.json">Border measurements</a> | <a href="proportional-clean-selection.json">Native proportional layout and rendering validation</a> | <a href="flat-color-selection.json">Flat-color palette and validation</a> | <a href="../variants/">All previous versions</a> | <a href="../backlight/">Earlier HDR experiment</a></p></footer>
+<footer><p>Antialiased edge pixels blend normally with neighboring regions or the transparent background. Earlier versions: <a href="../variants/ivory-keycap.png">original ivory</a> | <a href="logo-flat-color.png">solid-color alternative</a> | <a href="logo-manual-layout.png">earlier screenshot reconstruction</a> | <a href="logo-photo-glyphs.png">first photo attempt</a> | <a href="logo-photo-proportions.png">thin measured correction</a> | <a href="logo-photo-proportions-bold.png">earlier bold photo study</a> | <a href="logo-before-flat-border.png">even-width shaded border</a> | <a href="rim-slimmer.png">slimmer border</a> | <a href="rim-neutral.png">neutral-black border</a>. <a href="selection.json">Border measurements</a> | <a href="proportional-equal-stroke-selection.json">Equal-stroke width and pixel-preservation checks</a> | <a href="proportional-clean-selection.json">Native proportional layout</a> | <a href="../variants/">All previous versions</a> | <a href="../backlight/">Earlier HDR experiment</a></p></footer>
 </body></html>"""
     (OUTPUT / "index.html").write_text(page.replace("__CARDS__", "\n".join(cards)), encoding="utf-8")
     assert source.read_bytes() == original, "Original ivory version changed"
@@ -616,6 +722,7 @@ footer{margin-top:25px;font-size:14px}@media(max-width:950px){.grid{grid-templat
     print(f"Bold alternative verified: {stroke_measurements}; glyph scale {PHOTO_BOLD_SCALE}, group drop {PHOTO_BOLD_DROP * OUTPUT_SCALE}px.")
     print(f"Manual layout regenerated from original geometry and verified: {manual_layout}")
     print(f"Saved native proportional layout regenerated and verified: {proportional_layout}")
+    print(f"Equal-stroke alternative verified: {equal_checks}")
     print(f"Created {OUTPUT / 'index.html'}")
 
 

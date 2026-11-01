@@ -1,0 +1,32 @@
+{
+  "status": "alternative",
+  "asset": "logo-proportional-equal-stroke.png",
+  "source": "logo-proportional-clean.png",
+  "source_sha256": "380e95a32734c30317f767d4a2af7d677c86a0000ed28f237f2440b835bbba20",
+  "sha256": "538a5d17d5858b055ca90c42d491fec790230c695ab58e09da8328196441e2cc",
+  "changes": "Only thin the 4's vertical, horizontal, and diagonal strokes to the unchanged circle's width.",
+  "checks": {
+    "target_stroke_width_output_pixels": 25.682,
+    "measured_stroke_widths_output_pixels": {
+      "four_vertical": 26.0,
+      "four_horizontal": 26.0,
+      "four_diagonal": 25.719,
+      "circle_horizontal": 25.829,
+      "circle_vertical": 25.829
+    },
+    "four_bounds": [
+      302,
+      172,
+      485,
+      414
+    ],
+    "circle_and_keycap_pixel_identical": true,
+    "validation": {
+      "original_opaque_ink_pixels": 44887,
+      "variant_opaque_ink_pixels": 30655,
+      "changed_pixels": 50620,
+      "outside_glyphs_unchanged": true,
+      "silhouette_unchanged": true
+    }
+  }
+}
