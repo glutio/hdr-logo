@@ -2,8 +2,10 @@
   "status": "standard",
   "asset": "logo.png",
   "source": "../variants/ivory-keycap.png",
-  "sha256": "449905a3301b325a411449096163a0cb05c500ac5ca2f83cf49072759a002b74",
-  "correction": "Constant-width black border; outer silhouette and non-perimeter artwork unchanged.",
+  "sha256": "a5d9667ba6cfc9c4f8daa3837b03e93fa92264dc7d3431921bec407a6c473abf",
+  "correction": "Constant-width border with one solid ink color; ivory artwork and geometry unchanged.",
+  "border_color": "#191b14",
+  "opaque_border_unique_colors": 1,
   "straight_border_pixels": 44,
   "rendered_corner_measurements_pixels": [
     44.071,
@@ -27,6 +29,6 @@
     43.966,
     43.881
   ],
-  "previous_standard": "../variants/ivory-keycap.png",
+  "previous_standard": "logo-before-flat-border.png",
   "border_alternatives": "Earlier slimmer and neutral-color proofs remain available."
 }

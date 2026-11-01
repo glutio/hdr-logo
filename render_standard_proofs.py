@@ -69,6 +69,22 @@ def main():
     assert np.array_equal(corrected[~changed], base[~changed]), "Artwork outside border correction changed"
     assert np.array_equal(corrected[..., 3], base[..., 3]), "Outer silhouette changed"
     assert np.any(corrected != base), "Border correction was not applied"
+    shaded = corrected.copy()
+    archive = OUTPUT / "logo-before-flat-border.png"
+    if archive.exists():
+        assert np.array_equal(np.asarray(Image.open(archive)), shaded), "Archived border version changed"
+    else:
+        Image.fromarray(shaded).save(archive)
+    ink_color = np.array([25, 27, 20])
+    border_pixels = (outer > 0) & (uniform_gold < 1)
+    flat_perimeter = ink_color + uniform_gold[..., None] * (key_finish - ink_color)
+    corrected[..., :3][border_pixels] = np.round(np.clip(flat_perimeter[border_pixels], 0, 255)).astype(np.uint8)
+    assert np.array_equal(corrected[uniform_gold == 1], shaded[uniform_gold == 1]), "Ivory artwork changed"
+    assert np.array_equal(corrected[..., 3], shaded[..., 3]), "Border geometry or transparency changed"
+    opaque_border = (outer == 1) & (uniform_gold == 0)
+    border_colors = np.unique(corrected[..., :3][opaque_border], axis=0)
+    assert np.array_equal(border_colors, ink_color[None, :]), f"Border still has multiple colors: {border_colors}"
+    shaded_colors = np.unique(shaded[..., :3][opaque_border], axis=0)
     Image.fromarray(corrected).save(OUTPUT / "logo.png")
 
     for outline, inset in [
@@ -112,17 +128,19 @@ def main():
         "asset": "logo.png",
         "source": "../variants/ivory-keycap.png",
         "sha256": hashlib.sha256(canonical).hexdigest(),
-        "correction": "Constant-width black border; outer silhouette and non-perimeter artwork unchanged.",
+        "correction": "Constant-width border with one solid ink color; ivory artwork and geometry unchanged.",
+        "border_color": "#191b14",
+        "opaque_border_unique_colors": len(border_colors),
         "straight_border_pixels": 44,
         "rendered_corner_measurements_pixels": corner_thickness,
-        "previous_standard": "../variants/ivory-keycap.png",
+        "previous_standard": "logo-before-flat-border.png",
         "border_alternatives": "Earlier slimmer and neutral-color proofs remain available.",
     }
     (OUTPUT / "selection.json").write_text(json.dumps(selection, indent=2) + "\n", encoding="utf-8")
     cards = []
     for title, filename, description in [
-        ("Before / original ivory version", "../variants/ivory-keycap.png", "Left edge: 46px. Other straight edges: 44px. Corners: approximately 40-41px."),
-        ("After / corrected standard", "logo.png", "A constant 44px border around all four sides and corners. The outside silhouette and artwork away from the border are unchanged."),
+        ("Before / shaded border", "logo-before-flat-border.png", f"Even 44px geometry, but lighting produced {len(shaded_colors)} different RGB colors in the opaque border."),
+        ("After / solid border", "logo.png", "Same 44px geometry, one solid #191b14 ink color matching the symbols. The ivory artwork is unchanged."),
     ]:
         image_src = filename if filename != "logo.png" else f"{filename}?v={selection['sha256'][:12]}"
         sizes = "".join(
@@ -146,16 +164,17 @@ a{color:#ead2a2;text-underline-offset:4px}button{font:inherit;background:#262626
 footer{margin-top:25px;font-size:14px}@media(max-width:950px){.grid{grid-template-columns:1fr}article{max-width:600px;width:100%;margin:auto}}
 </style></head><body>
 <h1>The standard: ivory keycap.</h1>
-<p>The corrected standard has a true constant-width black border. Its inner and outer corner curves now have the same centers, with a 44px offset at this image's full resolution.</p>
-<p>The before version is preserved. Only the border-to-keycap perimeter changes; the outside silhouette, symbols, inset face, and internal shading are unchanged.</p>
+<p>The border now has both even geometry and even color: 44px wide, with one solid <code>#191b14</code> ink color matching the symbols. No lighting gradient remains on the border.</p>
+<p>The ivory surface, symbols, and border geometry are unchanged. Only border color and its antialiased edge blends change. The previous shaded border is preserved below.</p>
 <button type="button" onclick="document.body.classList.toggle('light')">Toggle light / dark background</button>
 <main class="grid">__CARDS__</main>
-<footer><p>Small previews are shown at actual CSS pixel sizes. Earlier proofs: <a href="rim-slimmer.png">slimmer border</a> | <a href="rim-neutral.png">neutral-black border</a>. <a href="selection.json">Border measurements</a> | <a href="../variants/">All previous versions</a> | <a href="../backlight/">Earlier HDR experiment</a></p></footer>
+<footer><p>Antialiased edge pixels blend normally with the ivory face or transparent background; every fully opaque border pixel has exactly the same RGB value. Earlier versions: <a href="../variants/ivory-keycap.png">original ivory</a> | <a href="rim-slimmer.png">slimmer border</a> | <a href="rim-neutral.png">neutral-black border</a>. <a href="selection.json">Border measurements</a> | <a href="../variants/">All previous versions</a> | <a href="../backlight/">Earlier HDR experiment</a></p></footer>
 </body></html>"""
     (OUTPUT / "index.html").write_text(page.replace("__CARDS__", "\n".join(cards)), encoding="utf-8")
     assert source.read_bytes() == original, "Original ivory version changed"
     print(f"Corrected standard: sides 44px; sampled corners {min(corner_thickness):.3f}-{max(corner_thickness):.3f}px.")
-    print("Original version, outer silhouette, and all non-perimeter pixels preserved.")
+    print(f"Opaque border now has {len(border_colors)} RGB color: {border_colors[0].tolist()}. Previously: {len(shaded_colors)} colors.")
+    print("Ivory artwork, geometry, and transparency unchanged; previous border archived.")
     print(f"Created {OUTPUT / 'index.html'}")
 
 
