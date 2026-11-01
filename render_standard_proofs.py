@@ -16,10 +16,56 @@ PHOTO_GUIDE_BOUNDS = {
     "four": (120, 59, 204, 173),
     "currency": (108, 229, 213, 330),
 }
+PHOTO_BOLD_SCALE = 0.96
+PHOTO_BOLD_DROP = 18
 
 
 def photo_coords(coords):
     return [(x * WIDTH / PHOTO_SIZE[0], y * HEIGHT / PHOTO_SIZE[1]) for x, y in coords]
+
+
+def bold_coords(coords, name):
+    bounds = np.array(PHOTO_GUIDE_BOUNDS[name]) * np.tile(np.array([WIDTH, HEIGHT]) / PHOTO_SIZE, 2)
+    center = (bounds[:2] + bounds[2:]) / 2
+    placed = center + PHOTO_BOLD_SCALE * (np.asarray(coords) - center)
+    placed[:, 1] += PHOTO_BOLD_DROP
+    return placed
+
+
+def draw_bold_photo_symbols(draw):
+    sx, sy = np.array([WIDTH, HEIGHT]) / PHOTO_SIZE
+    left, stem_right = 120 * sx, 186 * sx
+    stem_left = stem_right - 18 / PHOTO_BOLD_SCALE
+    bar_top = 136 * sy - 17 / (2 * PHOTO_BOLD_SCALE)
+    bar_bottom = 136 * sy + 17 / (2 * PHOTO_BOLD_SCALE)
+    apex = (179 * sx, 60 * sy)
+    slope = (bar_top - apex[1]) / (apex[0] - left)
+    counter_edge = bar_top + slope * left + 19 / PHOTO_BOLD_SCALE * np.hypot(1, slope)
+    number = [
+        (left, bar_top), apex, (stem_right, 59 * sy),
+        (stem_right, bar_top), (204 * sx, bar_top), (204 * sx, bar_bottom),
+        (stem_right, bar_bottom), (stem_right, 173 * sy),
+        (stem_left, 173 * sy), (stem_left, bar_bottom), (left, bar_bottom),
+    ]
+    counter = [
+        ((counter_edge - bar_top) / slope, bar_top),
+        (stem_left, counter_edge - slope * stem_left),
+        (stem_left, bar_top),
+    ]
+    draw.polygon(points(bold_coords(number, "four")), fill=255)
+    draw.polygon(points(bold_coords(counter, "four")), fill=0)
+    ring = np.array(photo_coords([(112, 234), (210, 327)]))
+    draw.ellipse(box(bold_coords(ring, "currency").ravel()), fill=255)
+    for tip in [
+        [(138, 248), (115, 229), (112, 231), (125, 260)],
+        [(186, 248), (210, 229), (213, 232), (198, 260)],
+        [(127, 305), (108, 327), (112, 330), (139, 316)],
+        [(186, 315), (210, 330), (213, 327), (198, 302)],
+    ]:
+        draw.polygon(points(bold_coords(photo_coords(tip), "currency")), fill=255)
+    ring[0] += 15 / PHOTO_BOLD_SCALE
+    ring[1] -= 15 / PHOTO_BOLD_SCALE
+    draw.ellipse(box(bold_coords(ring, "currency").ravel()), fill=0)
 
 
 def draw_photo_proportions(draw):
@@ -81,7 +127,7 @@ def render_photo_standard(standard, x, y, light, grain,
     assert np.all(pixels[old_symbols > new_symbols] == np.asarray(replacement)[old_symbols > new_symbols]), "Old glyph remnants remain"
     old_ink = int(np.count_nonzero(old_symbols == 255))
     new_ink = int(np.count_nonzero(new_symbols == 255))
-    assert 0 < new_ink < old_ink, "Photo-inspired glyphs are not lighter"
+    assert 0 < new_ink < old_ink, "Glyph variant has invalid ink coverage"
     Image.fromarray(pixels).save(OUTPUT / filename)
     return {
         "original_opaque_ink_pixels": old_ink,
@@ -92,8 +138,8 @@ def render_photo_standard(standard, x, y, light, grain,
     }
 
 
-def validate_photo_proportions():
-    coverage = np.asarray(mask(draw_photo_proportions))
+def validate_photo_proportions(draw_glyphs=draw_photo_proportions, scale=1, drop=0):
+    coverage = np.asarray(mask(draw_glyphs))
     split = round(200 * HEIGHT * OUTPUT_SCALE / PHOTO_SIZE[1])
     measurements = {}
     for name, section, offset in [
@@ -105,6 +151,9 @@ def validate_photo_proportions():
         expected = np.array(PHOTO_GUIDE_BOUNDS[name]) * np.tile(
             np.array([WIDTH, HEIGHT]) * OUTPUT_SCALE / PHOTO_SIZE, 2
         )
+        center = np.tile((expected[:2] + expected[2:]) / 2, 2)
+        expected = center + scale * (expected - center)
+        expected[[1, 3]] += drop * OUTPUT_SCALE
         assert np.all(np.abs(actual - expected) < 2), f"{name} misses the collage guides: {actual} vs {expected}"
         measurements[name] = {
             "photo_bounds": list(PHOTO_GUIDE_BOUNDS[name]),
@@ -112,6 +161,37 @@ def validate_photo_proportions():
             "rendered_output_bounds": actual.tolist(),
         }
     return measurements
+
+
+def validate_bold_strokes():
+    original = np.asarray(mask(draw_symbols))
+    bold = np.asarray(mask(draw_bold_photo_symbols))
+
+    def first_width(profile):
+        indices = np.flatnonzero(profile >= 128)
+        return len(np.split(indices, np.flatnonzero(np.diff(indices) > 1) + 1)[0])
+
+    stem_y = round(bold_coords(photo_coords([(186, 158)]), "four")[0, 1] * OUTPUT_SCALE)
+    bar_x = round(bold_coords(photo_coords([(198, 136)]), "four")[0, 0] * OUTPUT_SCALE)
+    ring_x, ring_y = np.round(
+        bold_coords(photo_coords([(161, 280.5)]), "currency")[0] * OUTPUT_SCALE
+    ).astype(int)
+    split = 250 * OUTPUT_SCALE
+    baseline = {
+        "four_stem": first_width(original[200 * OUTPUT_SCALE]),
+        "four_bar": first_width(original[:, 249 * OUTPUT_SCALE]),
+        "ring_horizontal": first_width(original[339 * OUTPUT_SCALE]),
+        "ring_vertical": first_width(original[split:, 210 * OUTPUT_SCALE]),
+    }
+    measured = {
+        "four_stem": first_width(bold[stem_y]),
+        "four_bar": first_width(bold[:, bar_x]),
+        "ring_horizontal": first_width(bold[ring_y]),
+        "ring_vertical": first_width(bold[split:, ring_x]),
+    }
+    for name, width in measured.items():
+        assert abs(width - baseline[name]) <= 1, f"{name} does not retain the standard's thickness: {width} vs {baseline[name]}"
+    return {"standard_output_pixels": baseline, "variant_output_pixels": measured}
 
 
 def create_proportion_proof():
@@ -126,6 +206,22 @@ def create_proportion_proof():
     draw.text((12, 530), "Corrected variant / same key frame", fill="white", font_size=16)
     draw.text((523, 530), "Your photo / original guide lines", fill="white", font_size=16)
     proof.save(OUTPUT / "photo-proportions-proof.png")
+
+
+def create_bold_proof():
+    proof = Image.open(OUTPUT / "photo-proportions-reference.png").convert("RGB").crop((0, 0, 1037, 560))
+    proof.paste("black", (0, 0, 511, 560))
+    variant = Image.open(OUTPUT / "logo-photo-proportions-bold.png").resize(PHOTO_SIZE, Image.Resampling.LANCZOS)
+    proof.paste(variant, (12, 11), mask=variant.getchannel("A"))
+    draw = ImageDraw.Draw(proof)
+    for name, bounds in PHOTO_GUIDE_BOUNDS.items():
+        source = np.array(photo_coords([bounds[:2], bounds[2:]]))
+        placed = bold_coords(source, name) * np.array(PHOTO_SIZE) / np.array([WIDTH, HEIGHT])
+        left, top, right, bottom = (placed + [12, 11]).ravel()
+        draw.rectangle((left, top, right, bottom), outline=(255, 0, 0))
+    draw.text((12, 530), "Bold strokes / smaller and lowered for rim clearance", fill="white", font_size=16)
+    draw.text((523, 530), "Photo / original guides include blur", fill="white", font_size=16)
+    proof.save(OUTPUT / "photo-proportions-bold-proof.png")
 
 
 def render_flat_standard(standard):
@@ -172,7 +268,7 @@ def main():
     original = source.read_bytes()
     previous_standard = (OUTPUT / "logo.png").read_bytes() if (OUTPUT / "logo.png").exists() else None
     previous_versions = {path: path.read_bytes() for path in OUTPUT.glob("*.png")
-                         if path.name not in ("logo-photo-proportions.png", "photo-proportions-proof.png")}
+                         if path.name not in ("logo-photo-proportions-bold.png", "photo-proportions-bold-proof.png")}
     base = np.asarray(Image.open(source).convert("RGBA"))
     height, width = base.shape[:2]
     y, x = np.mgrid[:height, :width].astype(np.float32) / OUTPUT_SCALE
@@ -335,6 +431,31 @@ def main():
         json.dumps(proportion_selection, indent=2) + "\n", encoding="utf-8"
     )
     create_proportion_proof()
+    bold_checks = render_photo_standard(
+        corrected, x, y, light, grain, draw_bold_photo_symbols, "logo-photo-proportions-bold.png"
+    )
+    assert bold_checks["variant_opaque_ink_pixels"] > proportion_checks["variant_opaque_ink_pixels"], "Bold variant did not restore heavier printing"
+    bold_guides = validate_photo_proportions(draw_bold_photo_symbols, PHOTO_BOLD_SCALE, PHOTO_BOLD_DROP)
+    stroke_measurements = validate_bold_strokes()
+    bold_bytes = (OUTPUT / "logo-photo-proportions-bold.png").read_bytes()
+    bold_selection = {
+        "status": "alternative",
+        "asset": "logo-photo-proportions-bold.png",
+        "source": "logo.png",
+        "source_sha256": hashlib.sha256(canonical).hexdigest(),
+        "sha256": hashlib.sha256(bold_bytes).hexdigest(),
+        "reference": "photo-proportions-reference.png",
+        "glyph_scale_from_guide_bounds": PHOTO_BOLD_SCALE,
+        "group_vertical_offset_output_pixels": PHOTO_BOLD_DROP * OUTPUT_SCALE,
+        "changes": "Restore standard stroke widths; reduce each measured glyph by 4%; lower both together for pale-rim clearance.",
+        "guides": bold_guides,
+        "stroke_width_validation": stroke_measurements,
+        "validation": bold_checks,
+    }
+    (OUTPUT / "photo-proportions-bold-selection.json").write_text(
+        json.dumps(bold_selection, indent=2) + "\n", encoding="utf-8"
+    )
+    create_bold_proof()
     selection = {
         "status": "standard",
         "asset": "logo.png",
@@ -352,8 +473,8 @@ def main():
     cards = []
     for title, filename, description in [
         ("Standard / shaded ivory", "logo.png", "The approved standard: a solid #191b14 border and symbols, with the original shaded ivory artwork."),
-        ("Photo proportions / corrected", "logo-photo-proportions.png", "Glyph size, proportions, spacing, and position follow your collage guides. Both glyphs are smaller and further left than in my first attempt; the ring is also higher. All keycap artwork is unchanged."),
-        ("Earlier photo attempt / superseded", "logo-photo-glyphs.png", "Preserved for comparison. This attempt changed stroke style but guessed the glyph proportions and placement."),
+        ("Corrected proportions / bold strokes", "logo-photo-proportions-bold.png", "The standard's heavier stroke widths restored. Both glyphs are 4% smaller than the guide bounds, and the whole group is lowered together to give the 4 more clearance from the pale rim. All keycap artwork is unchanged."),
+        ("Earlier correction / thin strokes", "logo-photo-proportions.png", "Preserved: the first guide-measured correction, before restoring bold strokes, reducing the glyphs slightly, and lowering the group."),
         ("Alternative / solid colors", "logo-flat-color.png", "Identical geometry with five solid colors: ink, shoulder, fold, pale rim, and ivory face. No gradients, dithering, or texture; only edges are antialiased."),
     ]:
         image_src = f"{filename}?v={hashlib.sha256((OUTPUT / filename).read_bytes()).hexdigest()[:12]}"
@@ -364,7 +485,7 @@ def main():
         cards.append(f"""<article><h2>{title}</h2><img class="large" src="{image_src}" width="1078" height="1142" alt="{title}"><p>{description}</p><div class="sizes">{sizes}</div><a href="{image_src}" download>Download PNG</a></article>""")
     page = """<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Standard ivory logo / measured photo proportions</title><style>
+<title>Standard ivory logo / corrected proportions and bold strokes</title><style>
 :root{color-scheme:dark;font-family:system-ui,sans-serif;background:#141414;color:#eee}*{box-sizing:border-box}
 body{width:100%;max-width:1500px;margin:auto;padding:28px 20px;overflow-wrap:anywhere}
 h1{font-size:clamp(25px,4vw,34px);margin:0 0 12px}p{color:#bbb;line-height:1.6}
@@ -380,11 +501,11 @@ footer{margin-top:25px;font-size:14px}@media(max-width:950px){.grid{grid-templat
 </style></head><body>
 <h1>The standard: ivory keycap.</h1>
 <p>The border now has both even geometry and even color: 44px wide, with one solid <code>#191b14</code> ink color matching the symbols. No lighting gradient remains on the border.</p>
-<p>The approved shaded standard is unchanged. The corrected alternative follows your collage guide lines for glyph size, proportions, spacing, and placement. The first photo attempt is preserved, but superseded. Clean outlines approximate the photographed printing rather than reproduce blur.</p>
+<p>The approved shaded standard is unchanged. The new alternative restores its heavier stroke widths, makes both measured glyphs 4% smaller to account for blur beyond the printed edges, and lowers the group together for more clearance from the pale rim. Earlier versions are preserved.</p>
 <button type="button" onclick="document.body.classList.toggle('light')">Toggle light / dark background</button>
 <main class="grid">__CARDS__</main>
-<figure class="reference"><img src="photo-proportions-proof.png" width="1037" height="560" alt="Corrected variant and photographed key aligned to the same red proportion guides"><figcaption>Matched key frames and shared guides: 4 spans 84 x 114 photo pixels; currency symbol spans 105 x 101, with a 56px gap. <a href="photo-proportions-reference.png">Your untouched collage</a>. The native logo above keeps its original aspect ratio.</figcaption></figure>
-<footer><p>Antialiased edge pixels blend normally with neighboring regions or the transparent background. Earlier versions: <a href="../variants/ivory-keycap.png">original ivory</a> | <a href="logo-before-flat-border.png">even-width shaded border</a> | <a href="rim-slimmer.png">slimmer border</a> | <a href="rim-neutral.png">neutral-black border</a>. <a href="selection.json">Border measurements</a> | <a href="photo-proportions-selection.json">Measured photo proportions and validation</a> | <a href="photo-glyph-selection.json">First photo attempt validation</a> | <a href="flat-color-selection.json">Flat-color palette and validation</a> | <a href="../variants/">All previous versions</a> | <a href="../backlight/">Earlier HDR experiment</a></p></footer>
+<figure class="reference"><img src="photo-proportions-bold-proof.png" width="1037" height="560" alt="Bold corrected variant with smaller glyph bounds and increased pale-rim clearance beside the photographed key"><figcaption>Left: bold strokes, slightly smaller glyphs, and the intentional downward offset. Right: your original photo guides, including blur. <a href="photo-proportions-reference.png">Your untouched collage</a> | <a href="photo-proportions-proof.png">Earlier thin-stroke alignment proof</a>. The native logo above keeps its original aspect ratio.</figcaption></figure>
+<footer><p>Antialiased edge pixels blend normally with neighboring regions or the transparent background. Earlier versions: <a href="../variants/ivory-keycap.png">original ivory</a> | <a href="logo-photo-glyphs.png">first photo attempt</a> | <a href="logo-before-flat-border.png">even-width shaded border</a> | <a href="rim-slimmer.png">slimmer border</a> | <a href="rim-neutral.png">neutral-black border</a>. <a href="selection.json">Border measurements</a> | <a href="photo-proportions-bold-selection.json">Bold strokes and placement validation</a> | <a href="photo-proportions-selection.json">Earlier measured proportions</a> | <a href="flat-color-selection.json">Flat-color palette and validation</a> | <a href="../variants/">All previous versions</a> | <a href="../backlight/">Earlier HDR experiment</a></p></footer>
 </body></html>"""
     (OUTPUT / "index.html").write_text(page.replace("__CARDS__", "\n".join(cards)), encoding="utf-8")
     assert source.read_bytes() == original, "Original ivory version changed"
@@ -396,6 +517,7 @@ footer{margin-top:25px;font-size:14px}@media(max-width:950px){.grid{grid-templat
     print(f"Flat-color alternative verified: {palette}; one RGB color per fully covered region.")
     print(f"Photo-inspired glyph alternative verified: {photo_checks}; all existing PNGs preserved byte-for-byte.")
     print(f"Corrected photo proportions verified against collage guides: {guide_measurements}")
+    print(f"Bold alternative verified: {stroke_measurements}; glyph scale {PHOTO_BOLD_SCALE}, group drop {PHOTO_BOLD_DROP * OUTPUT_SCALE}px.")
     print(f"Created {OUTPUT / 'index.html'}")
 
 

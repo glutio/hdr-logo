@@ -1,0 +1,74 @@
+{
+  "status": "alternative",
+  "asset": "logo-photo-proportions-bold.png",
+  "source": "logo.png",
+  "source_sha256": "a5d9667ba6cfc9c4f8daa3837b03e93fa92264dc7d3431921bec407a6c473abf",
+  "sha256": "82c24396197292164e61cdd68a456fea5bae8cc1776947cc11d16c5b482a2dcd",
+  "reference": "photo-proportions-reference.png",
+  "glyph_scale_from_guide_bounds": 0.96,
+  "group_vertical_offset_output_pixels": 36,
+  "changes": "Restore standard stroke widths; reduce each measured glyph by 4%; lower both together for pale-rim clearance.",
+  "guides": {
+    "four": {
+      "photo_bounds": [
+        120,
+        59,
+        204,
+        173
+      ],
+      "expected_output_bounds": [
+        270.456,
+        175.684,
+        449.693,
+        425.146
+      ],
+      "rendered_output_bounds": [
+        270,
+        176,
+        449,
+        425
+      ]
+    },
+    "currency": {
+      "photo_bounds": [
+        108,
+        229,
+        213,
+        330
+      ],
+      "expected_output_bounds": [
+        244.717,
+        562.596,
+        468.763,
+        783.611
+      ],
+      "rendered_output_bounds": [
+        245,
+        563,
+        468,
+        783
+      ]
+    }
+  },
+  "stroke_width_validation": {
+    "standard_output_pixels": {
+      "four_stem": 36,
+      "four_bar": 34,
+      "ring_horizontal": 30,
+      "ring_vertical": 30
+    },
+    "variant_output_pixels": {
+      "four_stem": 37,
+      "four_bar": 35,
+      "ring_horizontal": 30,
+      "ring_vertical": 31
+    }
+  },
+  "validation": {
+    "original_opaque_ink_pixels": 44887,
+    "variant_opaque_ink_pixels": 35013,
+    "changed_pixels": 72711,
+    "outside_glyphs_unchanged": true,
+    "silhouette_unchanged": true
+  }
+}
