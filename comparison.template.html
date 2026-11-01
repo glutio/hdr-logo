@@ -3,7 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Logo - SDR vs HDR</title>
+  <meta name="description" content="The final ivory logo: approved shaded standard, flat-color alternative, and two real HDR JPEGs.">
+  <title>Final ivory logo set - October 31, 2026</title>
   <style>
     :root { color-scheme: dark; font-family: system-ui, sans-serif; background: #111; color: #eee; }
     * { box-sizing: border-box; }
@@ -27,33 +28,43 @@
   </style>
 </head>
 <body>
-  <h1>Same logo. A brighter border.</h1>
-  <p><a href="standard/">Corrected ivory standard / before and after</a> | <a href="backlight/">Backlit ivory experiment</a> | <a href="variants/">All design versions</a></p>
-  <p>Cleaned artwork with smooth, supersampled edges. Compare the SDR baseline with a real HDR gain-map JPEG.</p>
+  <h1>The final ivory logo set.</h1>
+  <p>October 31, 2026. Four original files from the clean final package, all using the approved proportional geometry.</p>
+  <p><a href="__PACKAGE__" download="logo-final-2026-10-31.zip">Download the complete ZIP: images, generator, settings, and AGENTS.md</a></p>
   <p class="status" id="status" role="status">HDR requires a compatible display, HDR enabled in your operating system, and a browser that supports HDR JPEG gain maps.</p>
   <main class="comparison">
     <figure>
-      <h2>SDR baseline</h2>
-      <img class="sdr" src="data:image/png;base64,__SDR__" width="1078" height="1142" alt="Gold logo with a normal-brightness ivory border and black symbols">
-      <figcaption>Normal brightness, with a subtle warm halo.<br><a href="data:image/png;base64,__SDR__" download="start_logo_sdr_preview.png">Download SDR PNG</a></figcaption>
+      <h2>Standard / shaded ivory</h2>
+      <img class="sdr" src="__STANDARD__" width="1078" height="1142" alt="Approved proportional ivory keycap logo with shaded material and dark symbols">
+      <figcaption>The approved standard, unchanged. Shaded ivory, proportional symbols, and a uniform dark outer border. Transparent PNG.<br><a href="__STANDARD__" download="logo.png">Download standard PNG</a></figcaption>
     </figure>
     <figure>
-      <h2>HDR illuminated</h2>
-      <img class="hdr" src="data:image/jpeg;base64,__HDR__" width="1078" height="1142" alt="Same gold logo with an HDR-illuminated ivory border">
-      <figcaption>The border reaches approximately 4.5x the SDR baseline at full authored headroom.<br><a href="data:image/jpeg;base64,__HDR__" download="start_logo_hdr.jpg">Download HDR JPEG</a></figcaption>
+      <h2>Alternative / solid colors</h2>
+      <img class="sdr" src="__FLAT__" width="1078" height="1142" alt="The same proportional ivory logo with one solid color per region">
+      <figcaption>The same geometry and symbol placement, with solid region colors instead of shading. Transparent PNG.<br><a href="__FLAT__" download="logo-flat-color.png">Download solid-color PNG</a></figcaption>
+    </figure>
+    <figure>
+      <h2>HDR / inner rim lit</h2>
+      <img class="hdr" src="__RIM_HDR__" width="1078" height="1142" alt="Shaded standard with its pale inner rim illuminated in HDR and symbols remaining dark">
+      <figcaption>Real Ultra HDR JPEG: the pale inner rim lights up; the symbols and dark outer outline remain unlit.<br><a href="__RIM_HDR__" download="logo-inner-rim-hdr.jpg">Download inner-rim HDR JPEG</a></figcaption>
+    </figure>
+    <figure>
+      <h2>HDR / inner rim and symbols lit</h2>
+      <img class="hdr" src="__SYMBOLS_HDR__" width="1078" height="1142" alt="Shaded standard with both the pale inner rim and the 4 and currency symbol illuminated in HDR">
+      <figcaption>Real Ultra HDR JPEG: the pale inner rim and both symbols light up; the dark outer outline remains unlit.<br><a href="__SYMBOLS_HDR__" download="logo-inner-rim-symbols-hdr.jpg">Download inner-rim-and-symbols HDR JPEG</a></figcaption>
     </figure>
   </main>
   <footer>
-    <p>On an SDR display, both images should look nearly identical. The HDR effect comes from image data, not a CSS filter or a simulated glow. Capability detection does not confirm that HDR is active or that the gain map is being rendered.</p>
-    <p>This page includes both complete images and works offline. The JPEG uses a black background rather than transparency.</p>
-    <p><a href="data:image/png;base64,__CLEAN__" download="start_logo_clean.png">Download cleaned original PNG (transparent)</a></p>
+    <p>Both HDR JPEGs have an unlit SDR fallback based on the shaded standard, composited onto black. In an SDR viewer, their glow will not appear. The HDR effect comes from the original gain-map image data, not a CSS filter or a simulated preview.</p>
+    <p>Every file is 1078 x 1142. PNGs retain transparency; JPEGs have a black background. Display capability detection cannot confirm that HDR is enabled or that the browser is rendering the JPEG gain map.</p>
+    <p><a href="standard/">Previous comparisons and standard studies</a> | <a href="backlight/">Earlier HDR experiment</a> | <a href="variants/">Historical design studies</a></p>
   </footer>
   <script>
     const capability = matchMedia("(dynamic-range: high)");
     function updateStatus() {
       document.getElementById("status").textContent = capability.matches
         ? "Your browser reports a high-dynamic-range capable display. Enable HDR in your OS; gain-map rendering still depends on browser support."
-        : "Your browser does not report high-dynamic-range capability. The HDR image may appear as its normal SDR fallback.";
+        : "Your browser does not report high-dynamic-range capability. The HDR JPEGs may appear as their unlit SDR fallback.";
     }
     capability.addEventListener("change", updateStatus);
     updateStatus();

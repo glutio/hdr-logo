@@ -1,0 +1,27 @@
+{
+  "snapshot_date": "2026-10-31",
+  "standard_sha256": "72d59f8289542b2b873c8fa8481f1faa6b29a75c51448acf37e366bcd4b3d60f",
+  "canvas": [539, 571],
+  "draw_scale": 8,
+  "output_scale": 2,
+  "ink": [25, 27, 20],
+  "four": {
+    "scale": [0.8926829268292683, 0.8929889298892989],
+    "offset": [16.204878048780472, 13.667896678966784],
+    "stroke_width_output_pixels": 28.5,
+    "bounds": [302, 172, 485, 414]
+  },
+  "currency": {
+    "scale": [0.8550185873605948, 0.8571428571428571],
+    "offset": [18.15985130111524, 36.64285714285717],
+    "bounds": [280, 543, 510, 765]
+  },
+  "hdr": {
+    "background": [0, 0, 0],
+    "linear_warmth": [1.0, 0.9, 0.72],
+    "rim_linear_intensity": 3.8,
+    "symbols_linear_intensity": 4.4,
+    "target_peak_nits": 1015,
+    "reference_white_nits": 203
+  }
+}

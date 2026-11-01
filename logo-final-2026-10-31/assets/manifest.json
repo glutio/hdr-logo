@@ -1,0 +1,159 @@
+{
+  "snapshot_date": "2026-10-31",
+  "dimensions": [
+    1078,
+    1142
+  ],
+  "standard_sha256": "72d59f8289542b2b873c8fa8481f1faa6b29a75c51448acf37e366bcd4b3d60f",
+  "environment": {
+    "python": "3.12.10",
+    "numpy": "2.5.4",
+    "pillow": "13.0.0",
+    "imagecodecs": "2026.10.10",
+    "ultrahdr": "libultrahdr 2.0.2"
+  },
+  "flat_palette_rgb": {
+    "border": [
+      25,
+      27,
+      20
+    ],
+    "shoulder": [
+      181,
+      162,
+      124
+    ],
+    "fold": [
+      219,
+      204,
+      171
+    ],
+    "rim": [
+      240,
+      231,
+      208
+    ],
+    "face": [
+      235,
+      221,
+      191
+    ],
+    "symbols": [
+      25,
+      27,
+      20
+    ]
+  },
+  "hdr": {
+    "settings": {
+      "background": [
+        0,
+        0,
+        0
+      ],
+      "linear_warmth": [
+        1.0,
+        0.9,
+        0.72
+      ],
+      "rim_linear_intensity": 3.8,
+      "symbols_linear_intensity": 4.4,
+      "target_peak_nits": 1015,
+      "reference_white_nits": 203
+    },
+    "decoded_validation": {
+      "logo-inner-rim-hdr.jpg": {
+        "sdr_mean_absolute_error": 0.5245871633162101,
+        "readings": [
+          {
+            "headroom": 1,
+            "rim": 0.8019027343749999,
+            "symbols": 0.010084991455078124,
+            "face": 0.72752568359375,
+            "outer_border": 0.010084991455078124
+          },
+          {
+            "headroom": 1.5,
+            "rim": 1.15769736328125,
+            "symbols": 0.010099974822998046,
+            "face": 0.72752568359375,
+            "outer_border": 0.010099974822998046
+          },
+          {
+            "headroom": 2,
+            "rim": 1.5027537109375,
+            "symbols": 0.010113060760498047,
+            "face": 0.72752568359375,
+            "outer_border": 0.010113060760498047
+          },
+          {
+            "headroom": 3,
+            "rim": 2.170130078125,
+            "symbols": 0.010128044128417968,
+            "face": 0.72752568359375,
+            "outer_border": 0.010128044128417968
+          },
+          {
+            "headroom": 5,
+            "rim": 3.44627890625,
+            "symbols": 0.010148484039306639,
+            "face": 0.72752568359375,
+            "outer_border": 0.010148484039306639
+          }
+        ]
+      },
+      "logo-inner-rim-symbols-hdr.jpg": {
+        "sdr_mean_absolute_error": 0.5245871633162101,
+        "readings": [
+          {
+            "headroom": 1,
+            "rim": 0.8019027343749999,
+            "symbols": 0.010084991455078124,
+            "face": 0.72752568359375,
+            "outer_border": 0.010084991455078124
+          },
+          {
+            "headroom": 1.5,
+            "rim": 1.157522265625,
+            "symbols": 0.04513743896484375,
+            "face": 0.72752568359375,
+            "outer_border": 0.010084991455078124
+          },
+          {
+            "headroom": 2,
+            "rim": 1.502540625,
+            "symbols": 0.13079031982421876,
+            "face": 0.72752568359375,
+            "outer_border": 0.010084991455078124
+          },
+          {
+            "headroom": 3,
+            "rim": 2.170403515625,
+            "symbols": 0.5861616210937499,
+            "face": 0.72752568359375,
+            "outer_border": 0.010084991455078124
+          },
+          {
+            "headroom": 5,
+            "rim": 3.4500089843749997,
+            "symbols": 3.88165,
+            "face": 0.72752568359375,
+            "outer_border": 0.010084991455078124
+          }
+        ]
+      }
+    }
+  },
+  "assets_sha256": {
+    "logo.png": "72d59f8289542b2b873c8fa8481f1faa6b29a75c51448acf37e366bcd4b3d60f",
+    "logo-flat-color.png": "d3b4aa6a0b49b8fbac2b705943c55d73bf42d0e993cfc1c2b8770129df43bb60",
+    "logo-inner-rim-hdr.jpg": "6a13f9adf17716e763ddfc7536742160677f879e4ca447e97fe179cca39db7ac",
+    "logo-inner-rim-symbols-hdr.jpg": "46c276b6d11a76aefea6840236088aefd44498c669e2a730ed1b2e213a2c43d5"
+  },
+  "source_sha256": {
+    "generate.py": "f61489033acf3c2dafc3aa54f12ec71fcdf25ba388ab6d9657b6caa87c5ab53b",
+    "logo.json": "470cb4aba0a0cd9949ac5e1cb840c8d27101cdfc685a0cfe74f51c5d073907a7",
+    "requirements.txt": "18b780e41d5893095b142cf2b697df60fb67e0ebef131f0b00f09db3beae4274",
+    "AGENTS.md": "9702f170bdcaf251f5af595b6fdfc22450e53b0d41d1f6c62f83aba077a94c43"
+  }
+}

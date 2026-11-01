@@ -1,19 +1,29 @@
-import base64
 import hashlib
+import json
 from html.parser import HTMLParser
 from pathlib import Path
 
 
 root = Path(__file__).resolve().parent
 page = (root / "comparison.template.html").read_text(encoding="utf-8")
+release = root / "logo-final-2026-10-31"
+manifest = json.loads((release / "assets" / "manifest.json").read_text(encoding="utf-8"))
 assets = {
-    "__SDR__": root / "start_logo_sdr_preview.png",
-    "__HDR__": root / "start_logo_hdr.jpg",
-    "__CLEAN__": root / "start_logo_clean.png",
+    "__STANDARD__": "logo.png",
+    "__FLAT__": "logo-flat-color.png",
+    "__RIM_HDR__": "logo-inner-rim-hdr.jpg",
+    "__SYMBOLS_HDR__": "logo-inner-rim-symbols-hdr.jpg",
 }
-for marker, path in assets.items():
-    page = page.replace(marker, base64.b64encode(path.read_bytes()).decode("ascii"))
+for marker, filename in assets.items():
+    path = release / "assets" / filename
+    digest = hashlib.sha256(path.read_bytes()).hexdigest()
+    assert digest == manifest["assets_sha256"][filename], f"Final asset changed: {filename}"
+    page = page.replace(marker, f"{release.name}/assets/{filename}?v={digest[:12]}")
+archive = root / "logo-final-2026-10-31.zip"
+archive_digest = hashlib.sha256(archive.read_bytes()).hexdigest()
+page = page.replace("__PACKAGE__", f"{archive.name}?v={archive_digest[:12]}")
 assert not any(marker in page for marker in assets)
+assert "__PACKAGE__" not in page
 
 
 class VerifyPage(HTMLParser):
@@ -34,10 +44,10 @@ output = root / "index.html"
 output.write_text(page, encoding="utf-8")
 parser = VerifyPage()
 parser.feed(output.read_text(encoding="utf-8"))
-assert len(parser.images) == 2 and len(parser.downloads) == 3
-assert parser.images == parser.downloads[:2]
-for embedded, original in zip(parser.downloads, assets.values()):
-    restored = base64.b64decode(embedded.split(",", 1)[1], validate=True)
-    assert restored == original.read_bytes(), "Embedded image bytes changed"
-    print(f"Verified {original.name}: SHA256 {hashlib.sha256(restored).hexdigest()}")
+assert len(parser.images) == 4 and len(parser.downloads) == 5
+assert parser.images == parser.downloads[1:]
+for url in parser.downloads:
+    path = root.joinpath(*url.split("?", 1)[0].split("/"))
+    assert path.is_file(), f"Broken download: {url}"
+    print(f"Verified {path.name}: SHA256 {hashlib.sha256(path.read_bytes()).hexdigest()}")
 print(f"Created {output} ({output.stat().st_size:,} bytes)")
