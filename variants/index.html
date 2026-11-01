@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Logo material studies</title><style>
+:root{color-scheme:dark;font-family:system-ui,sans-serif;background:#141414;color:#eee}
+*{box-sizing:border-box}body{max-width:1800px;margin:auto;padding:32px}
+h1{margin:0 0 10px;font-size:32px}p{color:#bbb;line-height:1.6}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:22px;margin:30px 0}
+.next{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px;margin:30px auto;max-width:1120px}
+.next img{max-width:480px;margin:auto}
+article{padding:20px;border:1px solid #363636;border-radius:18px;background:#1c1c1c}
+h2{margin:0 0 20px;font-size:21px}img{width:100%;height:auto;display:block}
+a{color:#ecd6a4;text-underline-offset:4px}button{border:1px solid #555;border-radius:7px;padding:10px 16px;background:#222;color:#eee;cursor:pointer}
+.light article{background:#ece9e3}.light article h2{color:#222}.light article p{color:#555}.light article a{color:#795521}
+.references{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px;margin-top:22px}
+.references img{height:230px;object-fit:contain}.references figure{margin:0;padding:20px;background:#222;border-radius:12px}
+figcaption{text-align:center;color:#bbb;margin-top:14px}footer{margin-top:30px;font-size:14px}
+@media(max-width:1250px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:750px){.grid,.next{grid-template-columns:1fr}.grid article{max-width:600px;margin:auto}.references{grid-template-columns:1fr}}
+</style></head><body>
+<h1>Next iteration: defined ivory bevel.</h1>
+<p>A clearly bounded inset face, a slimmer rim, and a solid directional bevel. No folded corner. The right image removes every gradient to test the geometry.</p>
+<button type="button" onclick="document.body.classList.toggle('light')">Toggle card background</button>
+<main>
+<section class="next">
+<article><h2>Ivory / defined bevel</h2><img src="ivory-defined-bevel.png" width="1078" height="1142" alt="Ivory keycap with a defined inset face and directional bevel"><p>Restrained material shading enhances the already-defined shapes. The symbols and their positions are unchanged.</p><a href="ivory-defined-bevel.png" download>Download transparent PNG</a></article>
+<article><h2>The flat-fill test</h2><img src="ivory-defined-bevel-flat.png" width="1078" height="1142" alt="The same ivory geometry with flat colors and no gradients"><p>No shading or texture: the keycap structure is carried by five solid color regions, including the black ink and rim.</p><a href="ivory-defined-bevel-flat.png" download>Download flat transparent PNG</a></article>
+</section>
+<h2>All earlier versions / unchanged</h2><section class="grid"><article><h2>Satin gold</h2><img src="satin-gold.png" width="1078" height="1142" alt="Satin gold logo rendering"><p>A restrained refinement: warm satin finish, gentle bevels, and crisp black ink.</p><a href="satin-gold.png" download>Download transparent PNG</a></article>
+<article><h2>Ivory keycap</h2><img src="ivory-keycap.png" width="1078" height="1142" alt="Ivory keycap logo rendering"><p>More photographic: softly lit molded plastic, a rounded face, and a shaded lower edge.</p><a href="ivory-keycap.png" download>Download transparent PNG</a></article>
+<article><h2>Ivory / soft geometry</h2><img src="ivory-refined-geometry.png" width="1078" height="1142" alt="Ivory logo with a slimmer rim and continuously rounded keycap shoulder"><p>The previous geometry study: a slimmer rim and continuous shading, but too dependent on subtle lighting. Preserved for comparison.</p><a href="ivory-refined-geometry.png" download>Download transparent PNG</a></article>
+<article><h2>Monochrome</h2><img src="monochrome.png" width="1078" height="1142" alt="Monochrome logo rendering"><p>Closest in palette to your registered grayscale artwork, with dimensional shading restored.</p><a href="monochrome.png" download>Download transparent PNG</a></article></section>
+</main>
+<h2>Reference artwork</h2><section class="references">
+<figure><img src="../start_logo_original.png" width="539" height="571" alt="Original gold AI-generated logo"><figcaption>Your original gold logo</figcaption></figure>
+<figure><img src="registered-reference.jpg" width="539" height="571" alt="User-provided registered grayscale logo"><figcaption>Your registered grayscale reference</figcaption></figure>
+<figure><img src="../bk-0010-01-4-key.png" width="485" height="501" alt="Photograph of the original keyboard key"><figcaption>The photographed keyboard key</figcaption></figure>
+</section><footer><p>These are SDR material studies, not HDR exports. Each PNG is 1078 x 1142 with transparency. <a href="../backlight/">See the new backlit HDR version</a>.</p></footer>
+</body></html>

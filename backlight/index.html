@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Backlit ivory key - HDR</title>
+  <style>
+    :root { color-scheme: dark; font-family: system-ui, sans-serif; background: #101010; color: #eee; }
+    * { box-sizing: border-box; }
+    body { width: 100%; max-width: 780px; margin: auto; padding: 24px 18px 40px; overflow-wrap: anywhere; }
+    h1 { font-size: clamp(25px, 5vw, 36px); margin: 0 0 10px; }
+    p { color: #bbb; line-height: 1.5; }
+    .controls { display: flex; gap: 10px; margin: 20px 0 12px; }
+    button { flex: 1; min-width: 0; border: 1px solid #555; border-radius: 9px; background: #222; color: #ddd; padding: 12px; font: inherit; cursor: pointer; }
+    button[aria-pressed="true"] { border-color: #edd4a1; background: #3b3223; color: #fff1d7; }
+    figure { margin: 0; padding: 18px; border: 1px solid #333; border-radius: 18px; background: #000; }
+    img { display: block; width: 100%; max-width: 520px; height: auto; margin: auto; }
+    #logo { dynamic-range-limit: no-limit; }
+    figcaption { margin-top: 14px; color: #bbb; line-height: 1.5; }
+    a { color: #ecd3a1; text-underline-offset: 4px; }
+    .links { display: flex; flex-wrap: wrap; gap: 12px 22px; margin: 20px 0; }
+    #capability { font-size: 14px; padding: 12px; border: 1px solid #333; border-radius: 8px; }
+    details { margin: 24px 0; }
+    summary { cursor: pointer; color: #ddd; }
+    details img { margin-top: 18px; }
+    footer { border-top: 1px solid #333; padding-top: 16px; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <h1>A backlit ivory key.</h1>
+  <p>The 4, currency symbol, and inner rim illuminate in the HDR rendition. In the SDR base, both symbols stay black.</p>
+  <div class="controls" role="group" aria-label="Choose image rendition">
+    <button id="hdr" type="button" aria-pressed="true">HDR / backlit</button>
+    <button id="sdr" type="button" aria-pressed="false">SDR / unlit</button>
+  </div>
+  <figure>
+    <img id="logo" src="ivory-backlit-hdr.jpg" width="1078" height="1142" alt="Ivory key logo: the 4, currency symbol, and inner rim glow when HDR rendering is supported">
+    <figcaption id="caption" aria-live="polite">Real Ultra HDR JPEG. Extra illumination requires HDR gain-map support and sufficient display headroom.</figcaption>
+  </figure>
+  <p id="capability" role="status">Checking display capability...</p>
+  <div class="links">
+    <a href="ivory-backlit-hdr.jpg" download>Download HDR JPEG</a>
+    <a href="ivory-unlit-sdr.png" download>Download SDR PNG</a>
+    <a href="../variants/">All design versions</a>
+  </div>
+  <details>
+    <summary>If HDR is not working: see an SDR illustration of the lit design</summary>
+    <p>This is a tone-mapped illustration, not HDR. It shows the intended warm-white lighting without requiring an HDR screen.</p>
+    <img src="ivory-lit-sdr-illustration.png" width="1078" height="1142" loading="lazy" alt="SDR illustration of the logo with luminous ivory symbols and rim">
+  </details>
+  <footer>
+    <p>Switching the buttons changes the image file, not a CSS brightness effect. Keep screen brightness comfortable; full illumination depends on available HDR headroom. Capability detection does not prove that the gain map is being rendered.</p>
+    <p>Decoded validation: symbols remain near black at 1x headroom and reach approximately 3.9x SDR-reference white at 5x headroom; the rim reaches approximately 3.5x. The plain ivory face stays at its original brightness. <a href="validation.json">Validation data</a></p>
+    <p><a href="../">Original rim-only HDR comparison</a></p>
+  </footer>
+  <script>
+    const logo = document.getElementById("logo");
+    const caption = document.getElementById("caption");
+    const hdr = document.getElementById("hdr");
+    const sdr = document.getElementById("sdr");
+    const descriptions = {
+      hdr: "Real Ultra HDR JPEG. Extra illumination requires HDR gain-map support and sufficient display headroom.",
+      sdr: "Unlit SDR PNG. Black symbols and the normal ivory bevel; no gain map."
+    };
+    function select(mode) {
+      hdr.setAttribute("aria-pressed", String(mode === "hdr"));
+      sdr.setAttribute("aria-pressed", String(mode === "sdr"));
+      logo.src = mode === "hdr" ? "ivory-backlit-hdr.jpg" : "ivory-unlit-sdr.png";
+      logo.alt = mode === "hdr"
+        ? "Ivory key logo: the 4, currency symbol, and inner rim glow when HDR rendering is supported"
+        : "Unlit ivory key logo with black 4 and currency symbol";
+      caption.textContent = descriptions[mode];
+    }
+    hdr.addEventListener("click", () => select("hdr"));
+    sdr.addEventListener("click", () => select("sdr"));
+    logo.addEventListener("error", () => { caption.textContent = "Image could not load. Try the download links below."; });
+    const capability = matchMedia("(dynamic-range: high)");
+    function updateCapability() {
+      document.getElementById("capability").textContent = capability.matches
+        ? "Your browser reports HDR display capability. Gain-map rendering and illumination strength still depend on the browser and available headroom."
+        : "Your browser does not report HDR display capability. The HDR image may show its unlit SDR fallback; the illustration below shows the lit design.";
+    }
+    capability.addEventListener("change", updateCapability);
+    updateCapability();
+  </script>
+</body>
+</html>

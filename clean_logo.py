@@ -36,6 +36,33 @@ def fitted_finish(source, samples, nx, ny):
     return np.clip(target @ coefficients, 0, 255)
 
 
+def fold_mask(inner_gold):
+    t = np.linspace(0, 1, 160)[:, None]
+    curve = ((1 - t) ** 3 * [394, 460] + 3 * (1 - t) ** 2 * t * [434, 458]
+             + 3 * (1 - t) * t ** 2 * [441, 473] + t ** 3 * [459, 491])
+    top_curve = ((1 - t) ** 3 * [394, 34] + 3 * (1 - t) ** 2 * t * [430, 34]
+                 + 3 * (1 - t) * t ** 2 * [452, 34] + t ** 3 * [475, 28])
+    fold = mask(lambda draw: draw.polygon(
+        points([*top_curve.tolist(), (539, 28), (539, 571), (494, 532), *curve[::-1].tolist()]),
+        fill=255,
+    ))
+    return Image.fromarray(np.minimum(np.asarray(fold), np.asarray(inner_gold)))
+
+
+def draw_symbols(draw):
+    number = [(151, 170), (217, 81), (235, 81), (235, 170), (254, 170),
+              (254, 187), (235, 187), (235, 217), (217, 217),
+              (217, 187), (151, 187)]
+    draw.polygon(points(number), fill=255)
+    draw.polygon(points([(175, 170), (217, 112), (217, 170)]), fill=0)
+    draw.ellipse(box((145, 274, 275, 404)), fill=255)
+    for start, end in [((150, 284), (270, 395)), ((269, 284), (150, 395))]:
+        draw.line(points([start, end]), fill=255, width=15 * DRAW_SCALE)
+        for px, py in (start, end):
+            draw.ellipse(box((px - 7.5, py - 7.5, px + 7.5, py + 7.5)), fill=255)
+    draw.ellipse(box((160, 289, 260, 389)), fill=0)
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("source", type=Path)
@@ -67,32 +94,10 @@ def main():
     output.paste(gold_image, mask=inner_gold)
 
     # A cubic curve follows the original folded corner into its diagonal crease.
-    t = np.linspace(0, 1, 160)[:, None]
-    curve = ((1 - t) ** 3 * [394, 460] + 3 * (1 - t) ** 2 * t * [434, 458]
-             + 3 * (1 - t) * t ** 2 * [441, 473] + t ** 3 * [459, 491])
-    top_curve = ((1 - t) ** 3 * [394, 34] + 3 * (1 - t) ** 2 * t * [430, 34]
-                 + 3 * (1 - t) * t ** 2 * [452, 34] + t ** 3 * [475, 28])
-    fold = mask(lambda draw: draw.polygon(
-        points([*top_curve.tolist(), (539, 28), (539, 571), (494, 532), *curve[::-1].tolist()]),
-        fill=255,
-    ))
-    fold = Image.fromarray(np.minimum(np.asarray(fold), np.asarray(inner_gold)))
+    fold = fold_mask(inner_gold)
     output.paste((234, 220, 185, 255), mask=fold)
     output.paste(ivory, mask=tube_outer)
     output.paste(face_image, mask=tube_inner)
-
-    def draw_symbols(draw):
-        number = [(151, 170), (217, 81), (235, 81), (235, 170), (254, 170),
-                  (254, 187), (235, 187), (235, 217), (217, 217),
-                  (217, 187), (151, 187)]
-        draw.polygon(points(number), fill=255)
-        draw.polygon(points([(175, 170), (217, 112), (217, 170)]), fill=0)
-        draw.ellipse(box((145, 274, 275, 404)), fill=255)
-        for start, end in [((150, 284), (270, 395)), ((269, 284), (150, 395))]:
-            draw.line(points([start, end]), fill=255, width=15 * DRAW_SCALE)
-            for px, py in (start, end):
-                draw.ellipse(box((px - 7.5, py - 7.5, px + 7.5, py + 7.5)), fill=255)
-        draw.ellipse(box((160, 289, 260, 389)), fill=0)
 
     output.paste(black, mask=mask(draw_symbols))
     destination = Path(__file__).resolve().parent / "start_logo_clean.png"
