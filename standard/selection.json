@@ -1,0 +1,7 @@
+{
+  "status": "standard",
+  "asset": "logo.png",
+  "source": "../variants/ivory-keycap.png",
+  "sha256": "426c96f8f81370446d9f89e122f3981515fc965669756eb735cda79ef65258ac",
+  "border_alternatives": "Proofs only; the selected standard is unchanged."
+}
