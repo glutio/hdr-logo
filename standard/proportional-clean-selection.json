@@ -1,0 +1,75 @@
+{
+  "status": "alternative",
+  "asset": "logo-proportional-clean.png",
+  "source": "logo.png",
+  "source_sha256": "a5d9667ba6cfc9c4f8daa3837b03e93fa92264dc7d3431921bec407a6c473abf",
+  "sha256": "380e95a32734c30317f767d4a2af7d677c86a0000ed28f237f2440b835bbba20",
+  "reference": "logo-proportional.png",
+  "reference_sha256": "451a1a07d388f19070c7940ed7b5dcb30a98363c8e9c67f687b9ad54f59ffd94",
+  "layout": {
+    "four": {
+      "reference_bounds": [
+        302,
+        172,
+        485,
+        414
+      ],
+      "target_output_bounds": [
+        302.0,
+        172.0,
+        485.0,
+        414.0
+      ],
+      "scale": [
+        0.8926829268292683,
+        0.8929889298892989
+      ],
+      "source_offset": [
+        16.204878048780472,
+        13.667896678966784
+      ],
+      "rendered_output_bounds": [
+        302,
+        172,
+        485,
+        414
+      ]
+    },
+    "currency": {
+      "reference_bounds": [
+        280,
+        543,
+        510,
+        765
+      ],
+      "target_output_bounds": [
+        280.0,
+        543.0,
+        510.0,
+        765.0
+      ],
+      "scale": [
+        0.8550185873605948,
+        0.8571428571428571
+      ],
+      "source_offset": [
+        18.15985130111524,
+        36.64285714285717
+      ],
+      "rendered_output_bounds": [
+        280,
+        543,
+        510,
+        765
+      ]
+    }
+  },
+  "generation": "Original glyph primitives regenerated at the exact native reference layout before 8x supersampling.",
+  "validation": {
+    "original_opaque_ink_pixels": 44887,
+    "variant_opaque_ink_pixels": 33656,
+    "changed_pixels": 50999,
+    "outside_glyphs_unchanged": true,
+    "silhouette_unchanged": true
+  }
+}

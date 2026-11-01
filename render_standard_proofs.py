@@ -20,9 +20,8 @@ PHOTO_BOLD_SCALE = 0.96
 PHOTO_BOLD_DROP = 18
 
 
-def measure_manual_layout(standard):
-    reference = np.asarray(Image.open(OUTPUT / "manual-layout-reference.png").convert("RGB"))
-    left = reference[:, :reference.shape[1] // 2]
+def measure_manual_layout(standard, reference_name="manual-layout-reference.png"):
+    reference = np.asarray(Image.open(OUTPUT / reference_name).convert("RGB"))
 
     def bounds(selection):
         ys, xs = np.nonzero(selection)
@@ -34,9 +33,14 @@ def measure_manual_layout(standard):
         )
         return bounds(warm)
 
-    original_cap, reference_cap = warm_bounds(standard[..., :3]), warm_bounds(left)
-    registration_scale = (original_cap[2:] - original_cap[:2]) / (reference_cap[2:] - reference_cap[:2])
-    registration_offset = original_cap[:2] - reference_cap[:2] * registration_scale
+    if reference.shape[:2] == standard.shape[:2]:
+        left = reference
+        registration_scale, registration_offset = np.ones(2), np.zeros(2)
+    else:
+        left = reference[:, :reference.shape[1] // 2]
+        original_cap, reference_cap = warm_bounds(standard[..., :3]), warm_bounds(left)
+        registration_scale = (original_cap[2:] - original_cap[:2]) / (reference_cap[2:] - reference_cap[:2])
+        registration_offset = original_cap[:2] - reference_cap[:2] * registration_scale
     height, width = left.shape[:2]
     layout = {}
     for name, renderer, y_limits in [
@@ -321,7 +325,7 @@ def main():
     original = source.read_bytes()
     previous_standard = (OUTPUT / "logo.png").read_bytes() if (OUTPUT / "logo.png").exists() else None
     previous_versions = {path: path.read_bytes() for path in OUTPUT.glob("*.png")
-                         if path.name != "logo-manual-layout.png"}
+                         if path.name != "logo-proportional-clean.png"}
     base = np.asarray(Image.open(source).convert("RGBA"))
     height, width = base.shape[:2]
     y, x = np.mgrid[:height, :width].astype(np.float32) / OUTPUT_SCALE
@@ -528,6 +532,26 @@ def main():
     (OUTPUT / "manual-layout-selection.json").write_text(
         json.dumps(manual_selection, indent=2) + "\n", encoding="utf-8"
     )
+    draw_proportional, proportional_layout = measure_manual_layout(corrected, "logo-proportional.png")
+    proportional_checks = render_photo_standard(
+        corrected, x, y, light, grain, draw_proportional, "logo-proportional-clean.png"
+    )
+    proportional_bytes = (OUTPUT / "logo-proportional-clean.png").read_bytes()
+    proportional_selection = {
+        "status": "alternative",
+        "asset": "logo-proportional-clean.png",
+        "source": "logo.png",
+        "source_sha256": hashlib.sha256(canonical).hexdigest(),
+        "sha256": hashlib.sha256(proportional_bytes).hexdigest(),
+        "reference": "logo-proportional.png",
+        "reference_sha256": hashlib.sha256((OUTPUT / "logo-proportional.png").read_bytes()).hexdigest(),
+        "layout": proportional_layout,
+        "generation": "Original glyph primitives regenerated at the exact native reference layout before 8x supersampling.",
+        "validation": proportional_checks,
+    }
+    (OUTPUT / "proportional-clean-selection.json").write_text(
+        json.dumps(proportional_selection, indent=2) + "\n", encoding="utf-8"
+    )
     selection = {
         "status": "standard",
         "asset": "logo.png",
@@ -545,8 +569,8 @@ def main():
     cards = []
     for title, filename, description in [
         ("Standard / shaded ivory", "logo.png", "The approved standard: a solid #191b14 border and symbols, with the original shaded ivory artwork."),
-        ("Your layout / clean geometry", "logo-manual-layout.png", "Your manually adjusted glyph sizes and positions, regenerated from the original geometry rather than resized pixels. The original 4 shape and rounded currency-symbol tips are retained. All keycap artwork is unchanged."),
-        ("Earlier photo study / bold strokes", "logo-photo-proportions-bold.png", "Preserved: my earlier approximation, before using your manually adjusted layout and the original glyph shapes."),
+        ("Your saved layout / clean geometry", "logo-proportional-clean.png", "The exact glyph sizes and positions in your native logo-proportional.png, regenerated from the original geometry rather than resized pixels. The original 4 shape and rounded currency-symbol tips are retained. All keycap artwork is unchanged."),
+        ("Your saved layout / raster reference", "logo-proportional.png", "Your native resized image, preserved byte-for-byte. This is the authoritative layout reference, not the earlier screenshot."),
         ("Alternative / solid colors", "logo-flat-color.png", "Identical geometry with five solid colors: ink, shoulder, fold, pale rim, and ivory face. No gradients, dithering, or texture; only edges are antialiased."),
     ]:
         image_src = f"{filename}?v={hashlib.sha256((OUTPUT / filename).read_bytes()).hexdigest()[:12]}"
@@ -557,7 +581,7 @@ def main():
         cards.append(f"""<article><h2>{title}</h2><img class="large" src="{image_src}" width="1078" height="1142" alt="{title}"><p>{description}</p><div class="sizes">{sizes}</div><a href="{image_src}" download>Download PNG</a></article>""")
     page = """<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Standard ivory logo / clean rendering of your manual layout</title><style>
+<title>Standard ivory logo / clean rendering of your saved proportional layout</title><style>
 :root{color-scheme:dark;font-family:system-ui,sans-serif;background:#141414;color:#eee}*{box-sizing:border-box}
 body{width:100%;max-width:1500px;margin:auto;padding:28px 20px;overflow-wrap:anywhere}
 h1{font-size:clamp(25px,4vw,34px);margin:0 0 12px}p{color:#bbb;line-height:1.6}
@@ -573,11 +597,11 @@ footer{margin-top:25px;font-size:14px}@media(max-width:950px){.grid{grid-templat
 </style></head><body>
 <h1>The standard: ivory keycap.</h1>
 <p>The border now has both even geometry and even color: 44px wide, with one solid <code>#191b14</code> ink color matching the symbols. No lighting gradient remains on the border.</p>
-<p>The approved shaded standard is unchanged. The new alternative follows your manually adjusted left-hand layout, but regenerates both glyphs from their original geometry at the intended size. No glyph raster resizing or new letterform design. Earlier versions are preserved.</p>
+<p>The approved shaded standard is unchanged. The new alternative follows the exact native layout in your saved <code>logo-proportional.png</code>, regenerating both glyphs from their original geometry. No screenshot measurements, glyph raster resizing, or new letterform design. Your file and earlier versions are preserved.</p>
 <button type="button" onclick="document.body.classList.toggle('light')">Toggle light / dark background</button>
 <main class="grid">__CARDS__</main>
 <figure class="reference"><img src="manual-layout-reference.png" width="1374" height="734" alt="Your comparison: manually adjusted glyph layout on the left and our standard on the right"><figcaption>Your untouched comparison: adjusted layout on the left, standard on the right.</figcaption></figure>
-<footer><p>Antialiased edge pixels blend normally with neighboring regions or the transparent background. Earlier versions: <a href="../variants/ivory-keycap.png">original ivory</a> | <a href="logo-photo-glyphs.png">first photo attempt</a> | <a href="logo-photo-proportions.png">thin measured correction</a> | <a href="photo-proportions-bold-proof.png">earlier bold placement proof</a> | <a href="logo-before-flat-border.png">even-width shaded border</a> | <a href="rim-slimmer.png">slimmer border</a> | <a href="rim-neutral.png">neutral-black border</a>. <a href="selection.json">Border measurements</a> | <a href="manual-layout-selection.json">Manual layout and rendering validation</a> | <a href="flat-color-selection.json">Flat-color palette and validation</a> | <a href="../variants/">All previous versions</a> | <a href="../backlight/">Earlier HDR experiment</a></p></footer>
+<footer><p>Antialiased edge pixels blend normally with neighboring regions or the transparent background. Earlier versions: <a href="../variants/ivory-keycap.png">original ivory</a> | <a href="logo-manual-layout.png">earlier screenshot reconstruction</a> | <a href="logo-photo-glyphs.png">first photo attempt</a> | <a href="logo-photo-proportions.png">thin measured correction</a> | <a href="logo-photo-proportions-bold.png">earlier bold photo study</a> | <a href="logo-before-flat-border.png">even-width shaded border</a> | <a href="rim-slimmer.png">slimmer border</a> | <a href="rim-neutral.png">neutral-black border</a>. <a href="selection.json">Border measurements</a> | <a href="proportional-clean-selection.json">Native proportional layout and rendering validation</a> | <a href="flat-color-selection.json">Flat-color palette and validation</a> | <a href="../variants/">All previous versions</a> | <a href="../backlight/">Earlier HDR experiment</a></p></footer>
 </body></html>"""
     (OUTPUT / "index.html").write_text(page.replace("__CARDS__", "\n".join(cards)), encoding="utf-8")
     assert source.read_bytes() == original, "Original ivory version changed"
@@ -591,6 +615,7 @@ footer{margin-top:25px;font-size:14px}@media(max-width:950px){.grid{grid-templat
     print(f"Corrected photo proportions verified against collage guides: {guide_measurements}")
     print(f"Bold alternative verified: {stroke_measurements}; glyph scale {PHOTO_BOLD_SCALE}, group drop {PHOTO_BOLD_DROP * OUTPUT_SCALE}px.")
     print(f"Manual layout regenerated from original geometry and verified: {manual_layout}")
+    print(f"Saved native proportional layout regenerated and verified: {proportional_layout}")
     print(f"Created {OUTPUT / 'index.html'}")
 
 
