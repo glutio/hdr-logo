@@ -99,7 +99,7 @@ def main():
     variants = [
         ("satin-gold", "Satin gold", "A restrained refinement: warm satin finish, gentle bevels, and crisp black ink.",
          (195, 173, 122), (234, 219, 182), (246, 237, 218), (229, 215, 178), 0.55),
-        ("ivory-keycap", "Ivory keycap / standard", "Your selected standard: softly lit molded plastic, a rounded face, and a shaded lower edge.",
+        ("ivory-keycap", "Ivory keycap / before border fix", "Your original selected rendition, preserved. The corrected-border edition is now the standard.",
          (195, 176, 138), (229, 215, 185), (239, 230, 207), (226, 211, 178), 1.25),
         ("monochrome", "Monochrome", "Closest in palette to your registered grayscale artwork, with dimensional shading restored.",
          (172, 172, 172), (211, 211, 211), (241, 241, 241), (205, 205, 205), 0.70),
@@ -178,7 +178,7 @@ figcaption{text-align:center;color:#bbb;margin-top:14px}footer{margin-top:30px;f
 <figure><img src="../start_logo_original.png" width="539" height="571" alt="Original gold AI-generated logo"><figcaption>Your original gold logo</figcaption></figure>
 <figure><img src="registered-reference.jpg" width="539" height="571" alt="User-provided registered grayscale logo"><figcaption>Your registered grayscale reference</figcaption></figure>
 <figure><img src="../bk-0010-01-4-key.png" width="485" height="501" alt="Photograph of the original keyboard key"><figcaption>The photographed keyboard key</figcaption></figure>
-</section><footer><p>These are SDR material studies, not HDR exports. Each PNG is 1078 x 1142 with transparency. <a href="../standard/">Selected ivory standard and border proofs</a> | <a href="../backlight/">Earlier backlit HDR experiment</a>.</p></footer>
+</section><footer><p>These are SDR material studies, not HDR exports. Each PNG is 1078 x 1142 with transparency. <a href="../standard/">Corrected ivory standard / before and after</a> | <a href="../backlight/">Earlier backlit HDR experiment</a>.</p></footer>
 </body></html>"""
     (OUTPUT / "index.html").write_text(html.replace("__CARDS__", "\n".join(cards)), encoding="utf-8")
     print(f"Created {OUTPUT / 'index.html'}")

@@ -2,6 +2,31 @@
   "status": "standard",
   "asset": "logo.png",
   "source": "../variants/ivory-keycap.png",
-  "sha256": "426c96f8f81370446d9f89e122f3981515fc965669756eb735cda79ef65258ac",
-  "border_alternatives": "Proofs only; the selected standard is unchanged."
+  "sha256": "449905a3301b325a411449096163a0cb05c500ac5ca2f83cf49072759a002b74",
+  "correction": "Constant-width black border; outer silhouette and non-perimeter artwork unchanged.",
+  "straight_border_pixels": 44,
+  "rendered_corner_measurements_pixels": [
+    44.071,
+    44.015,
+    44.03,
+    44.012,
+    44.053,
+    43.897,
+    43.968,
+    44.004,
+    44.018,
+    44.164,
+    44.137,
+    44.021,
+    43.994,
+    44.013,
+    44.126,
+    44.148,
+    44.016,
+    44.004,
+    43.966,
+    43.881
+  ],
+  "previous_standard": "../variants/ivory-keycap.png",
+  "border_alternatives": "Earlier slimmer and neutral-color proofs remain available."
 }
