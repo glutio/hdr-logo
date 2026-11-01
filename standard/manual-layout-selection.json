@@ -1,7 +1,7 @@
 {
   "status": "alternative",
   "asset": "logo-manual-layout.png",
-  "source": "logo.png",
+  "source": "logo-before-proportional-standard.png",
   "source_sha256": "a5d9667ba6cfc9c4f8daa3837b03e93fa92264dc7d3431921bec407a6c473abf",
   "sha256": "4e825016202c09b7ef7603d57534e529fd5ba4fa39fe1edd7268f866b1fbcfc4",
   "reference": "manual-layout-reference.png",
