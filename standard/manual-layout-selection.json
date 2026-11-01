@@ -1,0 +1,74 @@
+{
+  "status": "alternative",
+  "asset": "logo-manual-layout.png",
+  "source": "logo.png",
+  "source_sha256": "a5d9667ba6cfc9c4f8daa3837b03e93fa92264dc7d3431921bec407a6c473abf",
+  "sha256": "4e825016202c09b7ef7603d57534e529fd5ba4fa39fe1edd7268f866b1fbcfc4",
+  "reference": "manual-layout-reference.png",
+  "layout": {
+    "four": {
+      "reference_bounds": [
+        191,
+        103,
+        307,
+        256
+      ],
+      "target_output_bounds": [
+        302.3664,
+        162.55555555555554,
+        484.8112,
+        403.54204204204206
+      ],
+      "scale": [
+        0.8899746341463414,
+        0.8892490276254115
+      ],
+      "source_offset": [
+        16.79703024390244,
+        9.24860654011944
+      ],
+      "rendered_output_bounds": [
+        302,
+        162,
+        485,
+        404
+      ]
+    },
+    "currency": {
+      "reference_bounds": [
+        177,
+        339,
+        323,
+        479
+      ],
+      "target_output_bounds": [
+        280.34720000000004,
+        534.2732732732733,
+        509.976,
+        754.7837837837837
+      ],
+      "scale": [
+        0.853638661710037,
+        0.8513919324730134
+      ],
+      "source_offset": [
+        18.530090706319754,
+        33.85524713903098
+      ],
+      "rendered_output_bounds": [
+        280,
+        534,
+        510,
+        755
+      ]
+    }
+  },
+  "generation": "Original glyph primitives transformed before 8x supersampling; glyph rasters are not resized.",
+  "validation": {
+    "original_opaque_ink_pixels": 44887,
+    "variant_opaque_ink_pixels": 33537,
+    "changed_pixels": 57925,
+    "outside_glyphs_unchanged": true,
+    "silhouette_unchanged": true
+  }
+}

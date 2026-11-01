@@ -49,18 +49,36 @@ def fold_mask(inner_gold):
     return Image.fromarray(np.minimum(np.asarray(fold), np.asarray(inner_gold)))
 
 
-def draw_symbols(draw):
+def draw_number(draw, transform=None):
     number = [(151, 170), (217, 81), (235, 81), (235, 170), (254, 170),
               (254, 187), (235, 187), (235, 217), (217, 217),
               (217, 187), (151, 187)]
+    counter = [(175, 170), (217, 112), (217, 170)]
+    if transform is not None:
+        number, counter = transform(number), transform(counter)
     draw.polygon(points(number), fill=255)
-    draw.polygon(points([(175, 170), (217, 112), (217, 170)]), fill=0)
-    draw.ellipse(box((145, 274, 275, 404)), fill=255)
+    draw.polygon(points(counter), fill=0)
+
+
+def draw_currency(draw, transform=None, width_scale=1):
+    outer, inner = [(145, 274), (275, 404)], [(160, 289), (260, 389)]
+    if transform is not None:
+        outer, inner = transform(outer), transform(inner)
+    draw.ellipse(box((*outer[0], *outer[1])), fill=255)
     for start, end in [((150, 284), (270, 395)), ((269, 284), (150, 395))]:
-        draw.line(points([start, end]), fill=255, width=15 * DRAW_SCALE)
+        line = [start, end] if transform is None else transform([start, end])
+        draw.line(points(line), fill=255, width=round(15 * DRAW_SCALE * width_scale))
         for px, py in (start, end):
-            draw.ellipse(box((px - 7.5, py - 7.5, px + 7.5, py + 7.5)), fill=255)
-    draw.ellipse(box((160, 289, 260, 389)), fill=0)
+            cap = [(px - 7.5, py - 7.5), (px + 7.5, py + 7.5)]
+            if transform is not None:
+                cap = transform(cap)
+            draw.ellipse(box((*cap[0], *cap[1])), fill=255)
+    draw.ellipse(box((*inner[0], *inner[1])), fill=0)
+
+
+def draw_symbols(draw):
+    draw_number(draw)
+    draw_currency(draw)
 
 
 def main():
