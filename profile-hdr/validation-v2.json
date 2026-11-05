@@ -1,0 +1,58 @@
+{
+  "iris-and-pupil-white": {
+    "size": [
+      1254,
+      1254
+    ],
+    "bytes": 1423253,
+    "median_eye_luminance_relative_to_sdr_white": [
+      3.9680273437499998,
+      3.96337109375
+    ],
+    "decode_display_boost": 4.926108374384237,
+    "sdr_fallback_mean_error_8bit": 0.6633429061029161,
+    "outside_mask_hdr_error_p999_relative_to_sdr_white": 0.0001220703125
+  },
+  "iris-and-pupil-red": {
+    "size": [
+      1254,
+      1254
+    ],
+    "bytes": 1425043,
+    "median_eye_luminance_relative_to_sdr_white": [
+      2.3316815185546877,
+      2.336978688812256
+    ],
+    "decode_display_boost": 4.926108374384237,
+    "sdr_fallback_mean_error_8bit": 0.6633429061029161,
+    "outside_mask_hdr_error_p999_relative_to_sdr_white": 0.0001220703125
+  },
+  "entire-eyeball-white": {
+    "size": [
+      1254,
+      1254
+    ],
+    "bytes": 1426904,
+    "median_eye_luminance_relative_to_sdr_white": [
+      3.9742539062499995,
+      3.9671345703125
+    ],
+    "decode_display_boost": 4.926108374384237,
+    "sdr_fallback_mean_error_8bit": 0.6633429061029161,
+    "outside_mask_hdr_error_p999_relative_to_sdr_white": 0.0001220703125
+  },
+  "entire-eyeball-red": {
+    "size": [
+      1254,
+      1254
+    ],
+    "bytes": 1428947,
+    "median_eye_luminance_relative_to_sdr_white": [
+      2.332463787841797,
+      2.3358721412658694
+    ],
+    "decode_display_boost": 4.926108374384237,
+    "sdr_fallback_mean_error_8bit": 0.6633429061029161,
+    "outside_mask_hdr_error_p999_relative_to_sdr_white": 0.0001220703125
+  }
+}
