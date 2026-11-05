@@ -51,7 +51,7 @@ def encode_even_gainmap(template, color, alpha):
 
 def main():
     OUTPUT.mkdir(exist_ok=True)
-    base = np.asarray(Image.open(ROOT / "profile-contours" / "source.png").convert("RGB"))
+    base = np.asarray(Image.open(OUTPUT / "source-light-background-v3.png").convert("RGB"))
     rgb = base.astype(np.float32) / 255
     linear = np.where(rgb <= 0.04045, rgb / 12.92, ((rgb + 0.055) / 1.055) ** 2.4)
     height, width = base.shape[:2]
@@ -78,7 +78,7 @@ def main():
                 gainmap_level=100, boostmin=0.01, boostmax=1024, nits=1000,
             )
             encoded = encode_even_gainmap(encoded, target, alpha)
-            path = OUTPUT / f"{name}-v2.jpg"
+            path = OUTPUT / f"{name}-v3.jpg"
             path.write_bytes(encoded)
             saved = path.read_bytes()
             assert imagecodecs.ultrahdr_check(saved)
@@ -123,9 +123,9 @@ def main():
             preview = np.clip(lit / 4, 0, 1)
             preview = np.where(preview <= 0.0031308, preview * 12.92, 1.055 * preview ** (1 / 2.4) - 0.055)
             preview = Image.fromarray(np.round(preview * 255).astype(np.uint8))
-            preview.crop((350, 520, 860, 645)).resize((1020, 250)).save(OUTPUT / f"{name}-v2-decoded.png")
+            preview.crop((350, 520, 860, 645)).resize((1020, 250)).save(OUTPUT / f"{name}-v3-decoded.png")
             print(f"{name}: {len(saved):,} bytes; eye luminance {medians}; valid RGB HDR gain map")
-    (OUTPUT / "validation-v2.json").write_text(json.dumps(report, indent=2) + "\n", encoding="ascii")
+    (OUTPUT / "validation-v3.json").write_text(json.dumps(report, indent=2) + "\n", encoding="ascii")
     print("All four variants retain pixel-identical normal SDR fallback images.")
 
 
