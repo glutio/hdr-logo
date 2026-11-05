@@ -27,8 +27,8 @@
 </head>
 <body>
   <main>
-    <h1>Eye contours before glow</h1>
-    <p>Traced on the 1254 &times; 1254 enhanced original. No glow or face edits have been applied. These are review outlines, not a claim of pixel-perfect segmentation.</p>
+    <h1>Eye contours before glow - revision 2</h1>
+    <p>The previous outlines were too approximate. This revision uses denser lid tracing and image-gradient refinement along the iris edges, with the iris mask clipped by the actual lid mask. No glow or face edits have been applied. These remain review outlines, not a claim of pixel-perfect segmentation.</p>
     <p><span class="green">Green: visible eyeball inside the eyelids</span> &middot; <span class="cyan">Cyan: visible iris boundary</span>. The eyeball mask excludes the pink inner corners and eyelid tissue; the iris mask is clipped to the eyeball mask.</p>
     <div class="controls">
       <label><input id="toggle" type="checkbox" checked>Show contour outlines (toggle to inspect the untouched eyes)</label>
@@ -36,19 +36,23 @@
     <h2>Left side of photograph - enlarged</h2>
     <div class="eye">
       <img src="profile-contours/left-original.png" width="780" height="480" alt="Unchanged enlarged eye on the left side of the photograph">
-      <img class="outline" src="profile-contours/left-outlined.png" width="780" height="480" alt="Same eye with green eyeball and cyan iris contours">
+      <img class="outline" src="profile-contours/left-outlined-v2.png" width="780" height="480" alt="Same eye with refined green eyeball and cyan iris contours">
     </div>
     <h2>Right side of photograph - enlarged</h2>
     <div class="eye">
       <img src="profile-contours/right-original.png" width="740" height="500" alt="Unchanged enlarged eye on the right side of the photograph">
-      <img class="outline" src="profile-contours/right-outlined.png" width="740" height="500" alt="Same eye with green eyeball and cyan iris contours">
+      <img class="outline" src="profile-contours/right-outlined-v2.png" width="740" height="500" alt="Same eye with refined green eyeball and cyan iris contours">
     </div>
     <h2>Full portrait</h2>
     <div class="eye portrait">
       <img src="profile-contours/source.png" width="1254" height="1254" alt="Unchanged high-resolution enhanced portrait">
-      <img class="outline" src="profile-contours/outlined.png" width="1254" height="1254" alt="Full portrait with eye contour outlines">
+      <img class="outline" src="profile-contours/outlined-v2.png" width="1254" height="1254" alt="Full portrait with refined eye contour outlines">
     </div>
-    <p><a href="profile-contours/eyeball-mask.png">Eyeball mask</a> &middot; <a href="profile-contours/iris-mask.png">Iris mask</a> &middot; <a href="profile-options.html">Previous glow previews</a></p>
+    <p><a href="profile-contours/eyeball-mask-v2.png">Eyeball mask</a> &middot; <a href="profile-contours/iris-mask-v2.png">Iris mask</a> &middot; <a href="profile-options.html">Previous glow previews</a></p>
+    <details>
+      <summary>Previous fit for comparison</summary>
+      <img src="profile-contours/right-outlined.png" width="740" height="500" style="max-width:100%;height:auto" alt="Previous rejected contour fit for the right side of the photograph">
+    </details>
   </main>
   <script>
     document.getElementById('toggle').addEventListener('change', function () {
