@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Actual HDR eye glow - white and red</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #181818; color: #eee; font: 16px/1.5 system-ui, sans-serif; }
+    main { max-width: 840px; margin: auto; padding: 24px; }
+    h1 { font-size: 25px; } h2 { font-size: 19px; }
+    p { color: #bbb; } a { color: #a9cbff; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 24px; }
+    img { width: 100%; max-width: 360px; height: auto; display: block; }
+    .controls { position: sticky; top: 0; padding: 12px; background: #242424; z-index: 1; }
+    body.original .effect { display: none; }
+    body:not(.original) .unchanged { display: none; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Actual HDR: white and red eye glow</h1>
+    <p>Four full-resolution 1254 &times; 1254 Ultra HDR JPEGs, using the refined contours and softened edges. These are actual HDR files, not SDR simulations. Their normal SDR fallback portraits are identical and unlit.</p>
+    <p>Use an HDR-capable display and viewer with HDR enabled. Actual brightness depends on your device, settings, and available HDR headroom.</p>
+    <div class="controls"><label><input id="toggle" type="checkbox"> Show unchanged SDR original instead</label></div>
+    <div class="grid">
+      <article>
+        <h2>B - Iris including pupil: white</h2>
+        <img class="effect" src="profile-hdr/iris-and-pupil-white.jpg" width="1254" height="1254" alt="HDR white glow across the iris and pupil">
+        <img class="unchanged" src="profile-contours/source.png" width="1254" height="1254" alt="Unchanged SDR portrait">
+        <p><a href="profile-hdr/iris-and-pupil-white.jpg" download>Download Ultra HDR JPEG</a></p>
+      </article>
+      <article>
+        <h2>B - Iris including pupil: red</h2>
+        <img class="effect" src="profile-hdr/iris-and-pupil-red.jpg" width="1254" height="1254" alt="HDR red glow across the iris and pupil">
+        <img class="unchanged" src="profile-contours/source.png" width="1254" height="1254" alt="Unchanged SDR portrait">
+        <p><a href="profile-hdr/iris-and-pupil-red.jpg" download>Download Ultra HDR JPEG</a></p>
+      </article>
+      <article>
+        <h2>C - Entire eyeball: white</h2>
+        <img class="effect" src="profile-hdr/entire-eyeball-white.jpg" width="1254" height="1254" alt="HDR white glow across the entire visible eye">
+        <img class="unchanged" src="profile-contours/source.png" width="1254" height="1254" alt="Unchanged SDR portrait">
+        <p><a href="profile-hdr/entire-eyeball-white.jpg" download>Download Ultra HDR JPEG</a></p>
+      </article>
+      <article>
+        <h2>C - Entire eyeball: red</h2>
+        <img class="effect" src="profile-hdr/entire-eyeball-red.jpg" width="1254" height="1254" alt="HDR red glow across the entire visible eye">
+        <img class="unchanged" src="profile-contours/source.png" width="1254" height="1254" alt="Unchanged SDR portrait">
+        <p><a href="profile-hdr/entire-eyeball-red.jpg" download>Download Ultra HDR JPEG</a></p>
+      </article>
+    </div>
+    <p><a href="profile-soft-glow.html">White SDR simulations</a> &middot; <a href="profile-contours.html?v=2">Contour inspection</a> &middot; <a href="profile.html">Earlier HDR comparison</a></p>
+  </main>
+  <script>
+    document.getElementById('toggle').addEventListener('change', function () {
+      document.body.classList.toggle('original', this.checked);
+    });
+  </script>
+</body>
+</html>
