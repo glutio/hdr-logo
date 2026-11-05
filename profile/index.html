@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Profile photo - SDR and Ultra HDR</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #181818; color: #eee; font: 16px/1.5 system-ui, sans-serif; }
+    main { max-width: 840px; margin: auto; padding: 32px 24px; }
+    h1 { font-size: 24px; }
+    .photos { display: flex; flex-wrap: wrap; gap: 24px; }
+    figure { margin: 0; flex: 1 1 280px; max-width: 360px; }
+    img { display: block; width: 100%; height: auto; }
+    figcaption { padding: 12px 0; }
+    a { color: #a9cbff; }
+    p { color: #bbb; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Profile photo</h1>
+    <p>The same portrait in SDR and Ultra HDR. The HDR gain map brightens the existing eye reflections without reshaping the face.</p>
+    <div class="photos">
+      <figure>
+        <img src="../profile-enhanced-2.png" width="360" height="360" alt="Profile portrait in SDR">
+        <figcaption>SDR original &middot; <a href="../profile-enhanced-2.png" download>Download PNG</a></figcaption>
+      </figure>
+      <figure>
+        <img src="../profile-enhanced-2-HDR.jpg" width="360" height="360" alt="Profile portrait with Ultra HDR eye highlights">
+        <figcaption>Ultra HDR &middot; <a href="../profile-enhanced-2-HDR.jpg" download>Download JPEG</a></figcaption>
+      </figure>
+    </div>
+    <p>Enable HDR in your display settings and use an HDR-capable browser. On SDR displays, the JPEG shows its normal SDR fallback.</p>
+    <p><a href="../">Logo comparison</a></p>
+  </main>
+</body>
+</html>
