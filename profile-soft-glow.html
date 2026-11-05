@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Three bright-white eye glow regions - SDR simulations</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #181818; color: #eee; font: 16px/1.5 system-ui, sans-serif; }
+    main { max-width: 1160px; margin: auto; padding: 24px; }
+    h1 { font-size: 25px; } h2 { font-size: 19px; }
+    p { color: #bbb; } a { color: #a9cbff; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 24px; }
+    img { display: block; width: 100%; height: auto; }
+    .portrait { max-width: 360px; }
+    .detail { margin: 16px 0; max-width: 1020px; }
+    .controls { position: sticky; top: 0; padding: 12px; background: #242424; z-index: 1; }
+    body.original .effect { display: none; }
+    body:not(.original) .unchanged { display: none; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Bright white: three glow regions</h1>
+    <p><strong>SDR simulations, visible on an ordinary monitor.</strong> Same bright-white treatment in three different regions, using refined high-resolution contours and antialiased, feathered edges. These show placement and blending, not actual HDR luminance. No new HDR version has been applied yet.</p>
+    <div class="controls"><label><input id="toggle" type="checkbox"> Show unchanged original instead</label></div>
+    <div class="grid">
+      <article>
+        <h2>A - Iris only</h2>
+        <img class="effect portrait" src="profile-soft-glow/iris-only-profile.png" width="360" height="360" alt="Bright white irises with pupils left dark">
+        <img class="unchanged portrait" src="profile-enhanced-2.png" width="360" height="360" alt="Original portrait">
+        <p>The brown iris glows white; the pupil stays dark and the whites stay unchanged.</p>
+      </article>
+      <article>
+        <h2>B - Iris including pupil</h2>
+        <img class="effect portrait" src="profile-soft-glow/iris-and-pupil-profile.png" width="360" height="360" alt="Bright white irises and pupils">
+        <img class="unchanged portrait" src="profile-enhanced-2.png" width="360" height="360" alt="Original portrait">
+        <p>The iris and pupil form one luminous white area; the whites stay unchanged.</p>
+      </article>
+      <article>
+        <h2>C - Entire eyeball</h2>
+        <img class="effect portrait" src="profile-soft-glow/entire-eyeball-profile.png" width="360" height="360" alt="Entire visible eye glowing bright white">
+        <img class="unchanged portrait" src="profile-enhanced-2.png" width="360" height="360" alt="Original portrait">
+        <p>The entire visible eye glows white, including the iris, pupil, and whites, bounded by the eyelids.</p>
+      </article>
+    </div>
+    <h2>A - Iris only: enlarged eyes</h2>
+    <img class="effect detail" src="profile-soft-glow/iris-only-eyes.png" width="1020" height="250" alt="Enlarged iris-only glow">
+    <img class="unchanged detail" src="profile-soft-glow/original-eyes.png" width="1020" height="250" alt="Original enlarged eyes">
+    <h2>B - Iris including pupil: enlarged eyes</h2>
+    <img class="effect detail" src="profile-soft-glow/iris-and-pupil-eyes.png" width="1020" height="250" alt="Enlarged iris and pupil glow">
+    <img class="unchanged detail" src="profile-soft-glow/original-eyes.png" width="1020" height="250" alt="Original enlarged eyes">
+    <h2>C - Entire eyeball: enlarged eyes</h2>
+    <img class="effect detail" src="profile-soft-glow/entire-eyeball-eyes.png" width="1020" height="250" alt="Enlarged entire-eyeball glow">
+    <img class="unchanged detail" src="profile-soft-glow/original-eyes.png" width="1020" height="250" alt="Original enlarged eyes">
+    <p><a href="profile-contours.html?v=2">Contour inspection</a> &middot; <a href="profile.html">Existing actual HDR version (unchanged)</a></p>
+  </main>
+  <script>
+    document.getElementById('toggle').addEventListener('change', function () {
+      document.body.classList.toggle('original', this.checked);
+    });
+  </script>
+</body>
+</html>
