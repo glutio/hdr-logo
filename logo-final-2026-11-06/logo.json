@@ -1,0 +1,29 @@
+{
+  "snapshot_date": "2026-11-06",
+  "standard_sha256": "8dc55efa2bc24216b98f58639ce23bb3480ed41b722d214457139159fe438ddd",
+  "glyph_scale_relative_to_october_31": 1.15,
+  "glyph_gap_output_pixels": 117,
+  "canvas": [539, 571],
+  "draw_scale": 8,
+  "output_scale": 2,
+  "ink": [25, 27, 20],
+  "four": {
+    "scale": [1.0265853658536586, 1.0269372693726937],
+    "offset": [-10.876890243902437, -3.2569188191882006],
+    "stroke_width_output_pixels": 32.775,
+    "bounds": [288, 160, 499, 439]
+  },
+  "currency": {
+    "scale": [0.9832713754646839, 0.9857142857142855],
+    "offset": [-8.741171003717483, 8.08928571428578],
+    "bounds": [263, 556, 528, 812]
+  },
+  "hdr": {
+    "background": [0, 0, 0],
+    "linear_warmth": [1.0, 0.9, 0.72],
+    "rim_linear_intensity": 3.8,
+    "symbols_linear_intensity": 4.4,
+    "target_peak_nits": 1015,
+    "reference_white_nits": 203
+  }
+}

@@ -675,9 +675,9 @@ def main():
     ), "Intermediate weight is not between the equal-stroke and original versions"
     balanced_bytes = (OUTPUT / "logo-proportional-balanced.png").read_bytes()
     balanced_selection = {
-        "status": "standard",
+        "status": "previous-standard",
         "asset": "logo-proportional-balanced.png",
-        "canonical_asset": "logo.png",
+        "release": "../logo-final-2026-10-31/",
         "source": "logo-proportional-clean.png",
         "source_sha256": hashlib.sha256(proportional_bytes).hexdigest(),
         "sha256": hashlib.sha256(balanced_bytes).hexdigest(),
@@ -687,30 +687,38 @@ def main():
     (OUTPUT / "proportional-balanced-selection.json").write_text(
         json.dumps(balanced_selection, indent=2) + "\n", encoding="utf-8"
     )
-    (OUTPUT / "logo.png").write_bytes(balanced_bytes)
-    assert (OUTPUT / "logo.png").read_bytes() == balanced_bytes, "Canonical PNG differs from the accepted version"
+    release = ROOT / "logo-final-2026-11-06"
+    approved = json.loads((release / "logo.json").read_text(encoding="utf-8"))
+    canonical_bytes = (release / "assets" / "logo.png").read_bytes()
+    assert hashlib.sha256(canonical_bytes).hexdigest() == approved["standard_sha256"]
+    (OUTPUT / "logo.png").write_bytes(canonical_bytes)
+    assert (OUTPUT / "logo.png").read_bytes() == canonical_bytes, "Canonical PNG differs from the accepted version"
     selection = {
         "status": "standard",
         "asset": "logo.png",
-        "source": "logo-proportional-balanced.png",
-        "sha256": hashlib.sha256(balanced_bytes).hexdigest(),
-        "correction": "Approved proportional layout with 28.5px four strokes, about 26px ring strokes, and the shaded ivory keycap.",
+        "source": "../logo-final-2026-11-06/assets/logo.png",
+        "sha256": hashlib.sha256(canonical_bytes).hexdigest(),
+        "correction": "Approved 115% glyphs with scaled strokes and a 117px gap; current ivory material unchanged.",
+        "release_date": approved["snapshot_date"],
         "dimensions": [width, height],
-        "glyph_stroke_measurements_pixels": balanced_checks["measured_stroke_widths_output_pixels"],
-        "four_bounds": balanced_checks["four_bounds"],
+        "four_stroke_target_pixels": approved["four"]["stroke_width_output_pixels"],
+        "glyph_gap_pixels": approved["glyph_gap_output_pixels"],
+        "four_bounds": approved["four"]["bounds"],
+        "currency_bounds": approved["currency"]["bounds"],
         "border_color": "#191b14",
         "opaque_border_unique_colors": len(border_colors),
         "straight_border_pixels": 44,
         "rendered_corner_measurements_pixels": corner_thickness,
-        "previous_standard": BASE_STANDARD_ASSET,
-        "previous_standard_sha256": hashlib.sha256(base_bytes).hexdigest(),
+        "previous_standard": "logo-proportional-balanced.png",
+        "previous_standard_sha256": hashlib.sha256(balanced_bytes).hexdigest(),
         "border_alternatives": "Earlier slimmer and neutral-color proofs remain available.",
     }
     (OUTPUT / "selection.json").write_text(json.dumps(selection, indent=2) + "\n", encoding="utf-8")
     cards = []
     for title, filename, description in [
-        ("Current standard / proportional ivory", "logo.png", "Your approved standard: proportional glyph layout, all three 4 strokes about 28.5px, ring about 26px, shaded ivory, and the solid 44px border."),
-        ("Previous standard / preserved", BASE_STANDARD_ASSET, "The previous standard, preserved byte-for-byte with its original larger glyphs and heavier 4."),
+        ("Current standard / 115% ivory", "logo.png", "Approved November 6: 115% glyphs, scaled strokes, a 117px gap, current ivory, and the solid 44px border."),
+        ("October 31 standard / preserved", "logo-proportional-balanced.png", "The preceding proportional standard at 100% glyph size, preserved byte-for-byte."),
+        ("Earlier original-layout standard / preserved", BASE_STANDARD_ASSET, "The earlier standard, preserved with its original larger glyphs and heavier 4."),
         ("Previous / equal widths", "logo-proportional-equal-stroke.png", "The previous study: both glyphs at about 26px stroke width."),
         ("Before / thicker 4", "logo-proportional-clean.png", "Your exact proportional layout with the original stroke weights: the 4 is heavier than the circle."),
     ]:
@@ -738,12 +746,14 @@ footer{margin-top:25px;font-size:14px}@media(max-width:950px){.grid{grid-templat
 </style></head><body>
 <h1>The standard: proportional ivory.</h1>
 <p>The border now has both even geometry and even color: 44px wide, with one solid <code>#191b14</code> ink color matching the symbols. No lighting gradient remains on the border.</p>
-<p>The approved standard is now the proportional ivory version: your chosen layout, 28.5px strokes for the 4, and about 26px for the circle. The canonical download is <a href="logo.png?v=__STANDARD_REVISION__">logo.png</a>. The previous standard and all earlier versions remain preserved.</p>
+<p>The approved November 6 standard uses 115% glyphs with scaled strokes and a 117px vertical gap. The current ivory material is unchanged. The canonical download is <a href="logo.png?v=__STANDARD_REVISION__">logo.png</a>. <a href="../">The new four-image set and ZIP</a>. The October 31 standard and all earlier versions remain preserved.</p>
 <button type="button" onclick="document.body.classList.toggle('light')">Toggle light / dark background</button>
 <main class="grid">__CARDS__</main>
 <figure class="reference"><img src="manual-layout-reference.png" width="1374" height="734" alt="Your earlier comparison: manually adjusted glyph layout on the left and the previous standard on the right"><figcaption>Your untouched earlier comparison: adjusted layout on the left, previous standard on the right.</figcaption></figure>
 <footer><p>Antialiased edge pixels blend normally with neighboring regions or the transparent background. Earlier versions: <a href="../variants/ivory-keycap.png">original ivory</a> | <a href="logo-proportional.png">your saved raster reference</a> | <a href="logo-flat-color.png">solid-color alternative</a> | <a href="logo-manual-layout.png">earlier screenshot reconstruction</a> | <a href="logo-photo-glyphs.png">first photo attempt</a> | <a href="logo-photo-proportions.png">thin measured correction</a> | <a href="logo-photo-proportions-bold.png">earlier bold photo study</a> | <a href="logo-before-flat-border.png">even-width shaded border</a> | <a href="rim-slimmer.png">slimmer border</a> | <a href="rim-neutral.png">neutral-black border</a>. <a href="selection.json">Border measurements</a> | <a href="proportional-balanced-selection.json">Intermediate stroke-weight and preservation checks</a> | <a href="proportional-equal-stroke-selection.json">Equal-stroke study checks</a> | <a href="proportional-clean-selection.json">Native proportional layout</a> | <a href="../variants/">All previous versions</a> | <a href="../backlight/">Earlier HDR experiment</a></p></footer>
 </body></html>"""
+    page = page.replace('href="logo-flat-color.png">solid-color alternative',
+                        'href="../logo-final-2026-11-06/assets/logo-flat-color.png">current solid-color alternative')
     page = page.replace("__CARDS__", "\n".join(cards)).replace("__STANDARD_REVISION__", selection["sha256"][:12])
     (OUTPUT / "index.html").write_text(page, encoding="utf-8")
     assert source.read_bytes() == original, "Original ivory version changed"

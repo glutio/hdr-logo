@@ -1,25 +1,27 @@
 {
   "status": "standard",
   "asset": "logo.png",
-  "source": "logo-proportional-balanced.png",
-  "sha256": "72d59f8289542b2b873c8fa8481f1faa6b29a75c51448acf37e366bcd4b3d60f",
-  "correction": "Approved proportional layout with 28.5px four strokes, about 26px ring strokes, and the shaded ivory keycap.",
+  "source": "../logo-final-2026-11-06/assets/logo.png",
+  "sha256": "8dc55efa2bc24216b98f58639ce23bb3480ed41b722d214457139159fe438ddd",
+  "correction": "Approved 115% glyphs with scaled strokes and a 117px gap; current ivory material unchanged.",
+  "release_date": "2026-11-06",
   "dimensions": [
     1078,
     1142
   ],
-  "glyph_stroke_measurements_pixels": {
-    "four_vertical": 28.675,
-    "four_horizontal": 28.829,
-    "four_diagonal": 28.397,
-    "circle_horizontal": 25.829,
-    "circle_vertical": 25.829
-  },
+  "four_stroke_target_pixels": 32.775,
+  "glyph_gap_pixels": 117,
   "four_bounds": [
-    302,
-    172,
-    485,
-    414
+    288,
+    160,
+    499,
+    439
+  ],
+  "currency_bounds": [
+    263,
+    556,
+    528,
+    812
   ],
   "border_color": "#191b14",
   "opaque_border_unique_colors": 1,
@@ -46,7 +48,7 @@
     43.966,
     43.881
   ],
-  "previous_standard": "logo-before-proportional-standard.png",
-  "previous_standard_sha256": "a5d9667ba6cfc9c4f8daa3837b03e93fa92264dc7d3431921bec407a6c473abf",
+  "previous_standard": "logo-proportional-balanced.png",
+  "previous_standard_sha256": "72d59f8289542b2b873c8fa8481f1faa6b29a75c51448acf37e366bcd4b3d60f",
   "border_alternatives": "Earlier slimmer and neutral-color proofs remain available."
 }

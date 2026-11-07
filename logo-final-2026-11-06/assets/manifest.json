@@ -1,0 +1,161 @@
+{
+  "snapshot_date": "2026-11-06",
+  "dimensions": [
+    1078,
+    1142
+  ],
+  "standard_sha256": "8dc55efa2bc24216b98f58639ce23bb3480ed41b722d214457139159fe438ddd",
+  "glyph_gap_output_pixels": 117,
+  "glyph_scale_relative_to_october_31": 1.15,
+  "environment": {
+    "python": "3.12.10",
+    "numpy": "2.5.4",
+    "pillow": "13.0.0",
+    "imagecodecs": "2026.10.10",
+    "ultrahdr": "libultrahdr 2.0.2"
+  },
+  "flat_palette_rgb": {
+    "border": [
+      25,
+      27,
+      20
+    ],
+    "shoulder": [
+      181,
+      162,
+      124
+    ],
+    "fold": [
+      219,
+      204,
+      171
+    ],
+    "rim": [
+      240,
+      231,
+      208
+    ],
+    "face": [
+      235,
+      221,
+      191
+    ],
+    "symbols": [
+      25,
+      27,
+      20
+    ]
+  },
+  "hdr": {
+    "settings": {
+      "background": [
+        0,
+        0,
+        0
+      ],
+      "linear_warmth": [
+        1.0,
+        0.9,
+        0.72
+      ],
+      "rim_linear_intensity": 3.8,
+      "symbols_linear_intensity": 4.4,
+      "target_peak_nits": 1015,
+      "reference_white_nits": 203
+    },
+    "decoded_validation": {
+      "logo-inner-rim-hdr.jpg": {
+        "sdr_mean_absolute_error": 0.5212334575607029,
+        "readings": [
+          {
+            "headroom": 1,
+            "rim": 0.8019027343749999,
+            "symbols": 0.010084991455078124,
+            "face": 0.72752568359375,
+            "outer_border": 0.010084991455078124
+          },
+          {
+            "headroom": 1.5,
+            "rim": 1.15769736328125,
+            "symbols": 0.010099974822998046,
+            "face": 0.72752568359375,
+            "outer_border": 0.010099974822998046
+          },
+          {
+            "headroom": 2,
+            "rim": 1.5027537109375,
+            "symbols": 0.010113060760498047,
+            "face": 0.72752568359375,
+            "outer_border": 0.010113060760498047
+          },
+          {
+            "headroom": 3,
+            "rim": 2.170130078125,
+            "symbols": 0.010128044128417968,
+            "face": 0.72752568359375,
+            "outer_border": 0.010128044128417968
+          },
+          {
+            "headroom": 5,
+            "rim": 3.44627890625,
+            "symbols": 0.010148484039306639,
+            "face": 0.72752568359375,
+            "outer_border": 0.010148484039306639
+          }
+        ]
+      },
+      "logo-inner-rim-symbols-hdr.jpg": {
+        "sdr_mean_absolute_error": 0.5212334575607029,
+        "readings": [
+          {
+            "headroom": 1,
+            "rim": 0.8019027343749999,
+            "symbols": 0.010084991455078124,
+            "face": 0.72752568359375,
+            "outer_border": 0.010084991455078124
+          },
+          {
+            "headroom": 1.5,
+            "rim": 1.157522265625,
+            "symbols": 0.04513743896484375,
+            "face": 0.72752568359375,
+            "outer_border": 0.010084991455078124
+          },
+          {
+            "headroom": 2,
+            "rim": 1.502540625,
+            "symbols": 0.13079031982421876,
+            "face": 0.72752568359375,
+            "outer_border": 0.010084991455078124
+          },
+          {
+            "headroom": 3,
+            "rim": 2.170403515625,
+            "symbols": 0.5861616210937499,
+            "face": 0.72752568359375,
+            "outer_border": 0.010084991455078124
+          },
+          {
+            "headroom": 5,
+            "rim": 3.4500089843749997,
+            "symbols": 3.88165,
+            "face": 0.72752568359375,
+            "outer_border": 0.010084991455078124
+          }
+        ]
+      }
+    }
+  },
+  "assets_sha256": {
+    "logo.png": "8dc55efa2bc24216b98f58639ce23bb3480ed41b722d214457139159fe438ddd",
+    "logo-flat-color.png": "90bbda34ea34b2206fde8aa5e50c43fb776f5e36ad7cdec1d643e559ab878007",
+    "logo-inner-rim-hdr.jpg": "5e3eb399e3f1d3b975ed2e5dae6d815e7dd456c86c7888bf8ec4d83127eb16d9",
+    "logo-inner-rim-symbols-hdr.jpg": "ce9dea9620314eb1e9bf01acb752ede3a3f5c3728ac0580b95c80a285f2ee291"
+  },
+  "source_sha256": {
+    "generate.py": "a3fe051cb734f86869d85bc5d894ad250b64812007833e5a419dbe8b5aca85cc",
+    "logo.json": "6f82f2cd7bbe78a6be40830cc091dcdc68b5d387e026376bec37f16b0260f036",
+    "requirements.txt": "18b780e41d5893095b142cf2b697df60fb67e0ebef131f0b00f09db3beae4274",
+    "AGENTS.md": "01d567ac7774d4217a5812bb3ab8bf327e57e566aec31c12b9326f006edf17c0"
+  }
+}

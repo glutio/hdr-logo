@@ -1,7 +1,7 @@
 {
-  "status": "standard",
+  "status": "previous-standard",
   "asset": "logo-proportional-balanced.png",
-  "canonical_asset": "logo.png",
+  "release": "../logo-final-2026-10-31/",
   "source": "logo-proportional-clean.png",
   "source_sha256": "380e95a32734c30317f767d4a2af7d677c86a0000ed28f237f2440b835bbba20",
   "sha256": "72d59f8289542b2b873c8fa8481f1faa6b29a75c51448acf37e366bcd4b3d60f",

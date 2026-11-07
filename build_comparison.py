@@ -6,7 +6,7 @@ from pathlib import Path
 
 root = Path(__file__).resolve().parent
 page = (root / "comparison.template.html").read_text(encoding="utf-8")
-release = root / "logo-final-2026-10-31"
+release = root / "logo-final-2026-11-06"
 manifest = json.loads((release / "assets" / "manifest.json").read_text(encoding="utf-8"))
 assets = {
     "__STANDARD__": "logo.png",
@@ -19,7 +19,7 @@ for marker, filename in assets.items():
     digest = hashlib.sha256(path.read_bytes()).hexdigest()
     assert digest == manifest["assets_sha256"][filename], f"Final asset changed: {filename}"
     page = page.replace(marker, f"{release.name}/assets/{filename}?v={digest[:12]}")
-archive = root / "logo-final-2026-10-31.zip"
+archive = root / f"{release.name}.zip"
 archive_digest = hashlib.sha256(archive.read_bytes()).hexdigest()
 page = page.replace("__PACKAGE__", f"{archive.name}?v={archive_digest[:12]}")
 assert not any(marker in page for marker in assets)
